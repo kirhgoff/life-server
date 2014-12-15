@@ -1,4 +1,4 @@
-organization  := "com.example"
+organization  := "org.kirhgoff"
 
 version       := "0.1"
 
