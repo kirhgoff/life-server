@@ -13,8 +13,7 @@ class WorldPrinter(val world:WorldModel, val aliveSymbol:Char, val deadSymbol:Ch
     elements.map{
       e:Element => asci(e.x)(e.y) = if (e.isAlive) aliveSymbol else deadSymbol
     }
-
-    println (s"New state calculated\n$asci\n")
+    asci.map(row => row.toList.mkString("")).toList.mkString("\n")
   }
 
 }

@@ -1,7 +1,7 @@
 package org.kirhgoff.ap.core
 
 import akka.actor.{ActorSystem, ActorRef, Props, Actor}
-import akka.routing.RoundRobinRouter
+import akka.routing.{RoundRobinPool, RoundRobinRouter}
 
 import scala.collection.mutable
 
@@ -21,7 +21,10 @@ case class NewStateIsReady(elements:List[Element]) extends RunnerMessage
  */
 class Worker extends Actor {
   def receive = {
-    case Work(element:Element) ⇒ sender ! Result(element.calculateNewState)
+    case Work(element:Element) ⇒ {
+      println("Worker:" + element)
+      sender ! Result(element.calculateNewState)
+    }
   }
 }
 
@@ -32,7 +35,7 @@ class Worker extends Actor {
  */
 class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
 
-  val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinRouter(nrOfWorkers)), name = "workerRouter")
+  val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
   var numberOfResults:Int = _
   var newElements:mutable.MutableList[Element] = mutable.MutableList()
 
@@ -43,10 +46,12 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
 
     //The logic itself
     case CalculateNewState(elements) => {
+      println("Calculating new state")
       numberOfResults = elements.length
       elements.map(workerRouter ! Work(_))
     }
     case Result(newElement) => {
+      println ("Result received:" + newElement)
       newElements += newElement
       numberOfResults -= 1
       if (numberOfResults == 0) {
@@ -69,11 +74,12 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
   def receive = {
     case NewStateIsReady(elements) ⇒ {
-      worldPrinter.print(elements)
+      println("New state is ready" + worldPrinter.print(elements))
       iterations += 1
       if (iterations >= iterationCount) {
         worldPrinter.printEndOfTheWorld ()
         context.system.shutdown()
+        System.exit(1)
       }
     }
   }
@@ -85,7 +91,7 @@ object Main {
     val worldGenerator = new WorldGenerator (10, 10, 30)
     val world = worldGenerator.generate
 
-    calculate(10, world, 5)
+    calculate(10, world, 2)
   }
 
   def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {

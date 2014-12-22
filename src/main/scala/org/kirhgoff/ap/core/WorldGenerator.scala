@@ -2,14 +2,14 @@ package org.kirhgoff.ap.core
 
 import scala.util.Random
 
-/**
- * Created by kirilllastovirya on 14/12/14.
- */
-class WorldGenerator(x:Int, y:Int, percentOfLife:Double) {
-  val world = new WorldModel(x, y)
+class WorldGenerator(width:Int, height:Int, percentOfLife:Double) {
+  val world = new WorldModel(width, height)
   def generate:WorldModel = {
-    val itemsCount:Int = calculateAmountOfLiveCells(x, y, percentOfLife)
-    val elements = Seq.fill(itemsCount)(Random.nextInt).map(_ => generateElement(x, y)).toList
+    //val itemsCount:Int = calculateAmountOfLiveCells(x, y, percentOfLife)
+    val elements:List[Element] = (List.range(0, width-1), List.range(0, height -1)).zipped  map {
+      (x:Int, y:Int) => generateElement(x, y)
+    }
+    println(elements.mkString(","))
     world.setElements (elements)
     world
   }
