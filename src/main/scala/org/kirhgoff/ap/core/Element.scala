@@ -22,7 +22,7 @@ class Element(val x:Int, val y:Int, world:WorldModel) {
   }
 
   private def toInt(b: Boolean) = if(b) 1 else 0
-  override def toString = s"E[x=$x, y=$y, ${if (alive) '1' else '0'}]"
+  override def toString = s"E[$x, $y, ${if (alive) '0' else '-'}]"
 
 }
 

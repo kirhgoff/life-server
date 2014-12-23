@@ -22,8 +22,9 @@ case class NewStateIsReady(elements:List[Element]) extends RunnerMessage
 class Worker extends Actor {
   def receive = {
     case Work(element:Element) ⇒ {
-      //println("Worker:" + element)
-      sender ! Result(element.calculateNewState)
+      val newState = element.calculateNewState
+      //println("Worker:" + element + "->" + newState)
+      sender ! Result(newState)
     }
   }
 }
@@ -46,7 +47,7 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
 
     //The logic itself
     case CalculateNewState(elements) => {
-      println("Calculating new state")
+      //println("Calculating new state")
       numberOfResults = elements.length
       elements.map(workerRouter ! Work(_))
     }
@@ -75,11 +76,10 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
     case NewStateIsReady(elements) ⇒ {
       println("New state is ready:\n" + worldPrinter.print(elements))
       iterations += 1
-      //world.setElements(elements)
+      world.setElements(elements)
       if (iterations >= iterationCount) {
         worldPrinter.printEndOfTheWorld ()
         context.system.shutdown()
-        System.exit(1)
       } else {
         sender ! CalculateNewState(elements)
       }
@@ -90,10 +90,10 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
 object Main {
   def main (args: Array[String]) {
-    val worldGenerator = new WorldGenerator (10, 10, 0.3)
+    val worldGenerator = new WorldGenerator (10, 10, 0.6)
     val world = worldGenerator.generate
 
-    calculate(10, world, 3)
+    calculate(10, world, 20)
   }
 
   def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {
@@ -102,6 +102,7 @@ object Main {
     val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
     val master = system.actorOf(Props(new Master(nrOfWorkers, listener)), name = "master")
 
+    println("Started with world:\n" + new WorldPrinter (world, '0', '-').print(world.getElements))
     master ! CalculateNewState(world.getElements)
   }
 }
