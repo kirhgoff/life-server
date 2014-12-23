@@ -17,7 +17,7 @@ class Element(val x:Int, val y:Int, world:WorldModel) {
     val value:WorldDimension = world.giveEnvironmentFor(x, y)
     val sum = value.aroundSense.foldLeft(0)(_ + toInt(_))
     newState.setAlive(sum == 3)
-
+    //println(this + " newState=" + newState)
     newState
   }
 

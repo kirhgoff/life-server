@@ -12,16 +12,13 @@ class MainTestSpec extends Specification {
   "WorldPrinter" should {
 
     "print an empty world" in {
-      val worldGenerator = new WorldGenerator (1, 1, 0)
-      val world = worldGenerator.generate
-
+      val world = new WorldGenerator (1, 1, 0).generate
       val printer = new WorldPrinter(world, '1', '0')
       printer.print(world.getElements) shouldEqual "0"
     }
 
-    "print an empty world" in {
+    "print a small world" in {
       val world = new WorldGenerator (2, 2, 0).generate
-
       val printer = new WorldPrinter(world, '1', '0')
       printer.print(world.getElements) shouldEqual "00\n00"
     }

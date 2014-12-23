@@ -22,7 +22,7 @@ case class NewStateIsReady(elements:List[Element]) extends RunnerMessage
 class Worker extends Actor {
   def receive = {
     case Work(element:Element) ⇒ {
-      println("Worker:" + element)
+      //println("Worker:" + element)
       sender ! Result(element.calculateNewState)
     }
   }
@@ -51,13 +51,12 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
       elements.map(workerRouter ! Work(_))
     }
     case Result(newElement) => {
-      println ("Result received:" + newElement)
+      //println ("Result received:" + newElement)
       newElements += newElement
       numberOfResults -= 1
       if (numberOfResults == 0) {
-        val memento = newElements.toList
-        newElements = mutable.MutableList()
-        listener ! NewStateIsReady(memento)
+        listener ! NewStateIsReady(newElements.toList)
+        newElements = mutable.MutableList()        
       }
     }
   }
@@ -74,12 +73,15 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
   def receive = {
     case NewStateIsReady(elements) ⇒ {
-      println("New state is ready" + worldPrinter.print(elements))
+      println("New state is ready:\n" + worldPrinter.print(elements))
       iterations += 1
+      //world.setElements(elements)
       if (iterations >= iterationCount) {
         worldPrinter.printEndOfTheWorld ()
         context.system.shutdown()
         System.exit(1)
+      } else {
+        sender ! CalculateNewState(elements)
       }
     }
   }
@@ -88,10 +90,10 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
 object Main {
   def main (args: Array[String]) {
-    val worldGenerator = new WorldGenerator (10, 10, 30)
+    val worldGenerator = new WorldGenerator (10, 10, 0.3)
     val world = worldGenerator.generate
 
-    calculate(10, world, 2)
+    calculate(10, world, 3)
   }
 
   def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {
