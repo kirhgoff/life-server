@@ -1,10 +1,9 @@
 package org.kirhgoff.ap
 
-import org.kirhgoff.ap.core.{WorldGenerator, WorldPrinter}
+import org.kirhgoff.ap.core._
 import org.specs2.mutable.Specification
-import spray.testkit.Specs2RouteTest
-import spray.http._
-import StatusCodes._
+
+import scala.util.Random
 
 class MainTestSpec extends Specification {
   //def actorRefFactory = system
@@ -12,17 +11,12 @@ class MainTestSpec extends Specification {
   "WorldPrinter" should {
 
     "print an empty world" in {
-      val world = new WorldGenerator (1, 1, 0).generate
-      val printer = new WorldPrinter(world, '1', '0')
-      printer.print(world.getElements) shouldEqual "0"
+      print(new WorldGenerator(1, 1, 0).generate) shouldEqual "0"
     }
 
     "print a small world" in {
-      val world = new WorldGenerator (2, 2, 0).generate
-      val printer = new WorldPrinter(world, '1', '0')
-      printer.print(world.getElements) shouldEqual "00\n00"
+      print(new WorldGenerator(2, 2, 0).generate) shouldEqual "00\n00"
     }
-
   }
 
   "WorldModel" should {
@@ -37,5 +31,43 @@ class MainTestSpec extends Specification {
 
       world.indexFor(-1, -1) shouldEqual 3
     }
+  }
+
+  "Element" should {
+    "correctly process its state" in {
+      val world = new WorldGenerator (10, 10, 0).generate
+      val element = new Element(50, 50, world)
+
+      element.setAlive(true)
+      element.calculateNewState (make(0)).isAlive shouldEqual false
+      element.calculateNewState (make(1)).isAlive shouldEqual false
+      element.calculateNewState (make(2)).isAlive shouldEqual true //Lives
+      element.calculateNewState (make(3)).isAlive shouldEqual true //lives
+      element.calculateNewState (make(4)).isAlive shouldEqual false
+      element.calculateNewState (make(5)).isAlive shouldEqual false
+      element.calculateNewState (make(6)).isAlive shouldEqual false
+      element.calculateNewState (make(7)).isAlive shouldEqual false
+
+      element.setAlive(false)
+      element.calculateNewState (make(0)).isAlive shouldEqual false
+      element.calculateNewState (make(1)).isAlive shouldEqual false
+      element.calculateNewState (make(2)).isAlive shouldEqual false
+      element.calculateNewState (make(3)).isAlive shouldEqual true //becomes alive
+      element.calculateNewState (make(4)).isAlive shouldEqual false
+      element.calculateNewState (make(5)).isAlive shouldEqual false
+      element.calculateNewState (make(6)).isAlive shouldEqual false
+      element.calculateNewState (make(7)).isAlive shouldEqual false
+
+    }
+  }
+
+  def print(world:WorldModel) = new WorldPrinter(world, '1', '0').print(world.getElements)
+  def make(aliveCount:Int) = {
+    val result = Array.ofDim[Boolean](8)
+    //todo find functional solution
+    for (index <- 0 to 7) {
+      result(index) = index < aliveCount
+    }
+    WorldDimension(Random.shuffle(result.toSeq).toArray[Boolean])
   }
 }

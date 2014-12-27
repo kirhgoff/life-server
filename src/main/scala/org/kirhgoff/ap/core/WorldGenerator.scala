@@ -23,5 +23,5 @@ class WorldGenerator(width:Int, height:Int, percentOfLife:Double) {
 
   def amountOfLiveCells(x: Int, y: Int, z: Double):Int = Math.round(x*y*z).toInt
 
-  def applyLife(elements:List[Element]) = elements.map(_.setAlive(random.nextDouble > percentOfLife))
+  def applyLife(elements:List[Element]) = elements.map(_.setAlive(random.nextDouble < percentOfLife))
 }
