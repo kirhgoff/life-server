@@ -37,7 +37,10 @@ class WorldModel(val width:Int, val height:Int) {
   }
 
 
-  def setElements(elements: List[Element]) = {this.elements = elements}
+  def setElements(elements: List[Element]) = {
+    //println (s"setElements: $elements")
+    this.elements = elements
+  }
 
   def getElements:List[Element] = elements
 

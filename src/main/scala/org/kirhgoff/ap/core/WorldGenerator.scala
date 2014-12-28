@@ -5,8 +5,8 @@ object WorldGenerator {
   def generate(width:Int, height:Int):WorldModel = {
     val world = new WorldModel(width, height)
     val elementsSeq = for {
-      x <- 0 until width
       y <- 0 until height
+      x <- 0 until width
     } yield generateElement(x, y, world)
 
     val elements = elementsSeq.toList

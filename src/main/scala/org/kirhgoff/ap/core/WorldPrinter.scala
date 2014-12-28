@@ -12,7 +12,7 @@ class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
     val asci:Array[Array[Char]] = Array.ofDim[Char](world.width, world.height)
     elements.map{
       e:Element => {
-        asci(e.x)(e.y) = if (e.isAlive) aliveSymbol else deadSymbol
+        asci(e.y)(e.x) = if (e.isAlive) aliveSymbol else deadSymbol
       }
     }
     asci.map(row => row.toList.mkString("")).toList.mkString("\n")
