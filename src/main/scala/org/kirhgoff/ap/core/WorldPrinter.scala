@@ -1,15 +1,13 @@
 package org.kirhgoff.ap.core
 
-/**
- * Created by kirilllastovirya on 14/12/14.
- */
-class WorldPrinter(val world:WorldModel, val aliveSymbol:Char, val deadSymbol:Char) {
+class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
 
   def printEndOfTheWorld() = {
     println ("============================>End of the world")
   }
 
-  def print(elements: List[Element]) = {
+  def print(world:WorldModel) = {
+    val elements = world.getElements
     //println ("Elements:" + elements.size)
     val asci:Array[Array[Char]] = Array.ofDim[Char](world.width, world.height)
     elements.map{

@@ -5,10 +5,6 @@ import akka.routing.{RoundRobinPool, RoundRobinRouter}
 
 import scala.collection.mutable
 
-/**
- * Created by kirilllastovirya on 14/12/14.
- */
-
 sealed trait RunnerMessage
 
 case class CalculateNewState(elements:List[Element]) extends RunnerMessage
@@ -70,13 +66,13 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
  */
 class Listener(world:WorldModel, iterationCount:Int) extends Actor {
   var iterations:Int = 0
-  var worldPrinter:WorldPrinter = new WorldPrinter (world, '0', '-')
+  var worldPrinter:WorldPrinter = new WorldPrinter ('0', '-')
 
   def receive = {
     case NewStateIsReady(elements) ⇒ {
-      println("New state is ready:\n" + worldPrinter.print(elements))
-      iterations += 1
       world.setElements(elements)
+      println("New state is ready:\n" + worldPrinter.print(world))
+      iterations += 1
       if (iterations >= iterationCount) {
         worldPrinter.printEndOfTheWorld ()
         context.system.shutdown()
@@ -90,10 +86,12 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
 object Main {
   def main (args: Array[String]) {
-    val worldGenerator = new WorldGenerator (10, 10, 0.6)
-    val world = worldGenerator.generate
+    val workers = 10
+    val width = 10
+    val height = 10
+    val iterations = 10
 
-    calculate(10, world, 20)
+    calculate(workers, WorldGenerator.generate (width, height), iterations)
   }
 
   def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {
@@ -102,7 +100,7 @@ object Main {
     val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
     val master = system.actorOf(Props(new Master(nrOfWorkers, listener)), name = "master")
 
-    println("Started with world:\n" + new WorldPrinter (world, '0', '-').print(world.getElements))
+    println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
     master ! CalculateNewState(world.getElements)
   }
 }

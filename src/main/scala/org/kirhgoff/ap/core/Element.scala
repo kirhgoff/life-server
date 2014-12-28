@@ -15,8 +15,15 @@ class Element(val x:Int, val y:Int, world:WorldModel) {
     val newState = new Element (x, y, world)
 
     val value:WorldDimension = world.giveEnvironmentFor(x, y)
-    val sum = value.aroundSense.foldLeft(0)(_ + toInt(_))
-    newState.setAlive(sum == 3)
+    val sum = value.surroundings.foldLeft(0)(_ + toInt(_))
+    //Conway's life rules
+//    alive match {
+//      case false if sum == 3 => newState.setAlive(true)
+//      case _ if sum == 2 || sum == 3 => newState.setAlive(true)
+//      case _ => newState.setAlive(false)
+//    }
+
+    newState.setAlive(alive && (sum == 2 || sum == 3) || !alive && (sum == 3))
     //println(this + " newState=" + newState)
     newState
   }

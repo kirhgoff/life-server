@@ -1,27 +1,20 @@
 package org.kirhgoff.ap.core
 
-import scala.util.Random
+object WorldGenerator {
 
-class WorldGenerator(width:Int, height:Int, percentOfLife:Double) {
-  val random = new Random
-  val world = new WorldModel(width, height)
-
-  def generate:WorldModel = {
+  def generate(width:Int, height:Int):WorldModel = {
+    val world = new WorldModel(width, height)
     val elementsSeq = for {
       x <- 0 until width
       y <- 0 until height
-    } yield generateElement(x, y)
+    } yield generateElement(x, y, world)
 
     val elements = elementsSeq.toList
-    applyLife(elements)
     world.setElements (elements)
-    println(s"WG: Generated elements ${elements.mkString(",")}")
+    //println(s"WG: Generated elements ${elements.mkString(",")}")
     world
   }
 
-  def generateElement(x:Int, y:Int):Element = new Element(x, y, world)
+  def generateElement(x:Int, y:Int, world:WorldModel):Element = new Element(x, y, world)
 
-  def amountOfLiveCells(x: Int, y: Int, z: Double):Int = Math.round(x*y*z).toInt
-
-  def applyLife(elements:List[Element]) = elements.map(_.setAlive(random.nextDouble > percentOfLife))
 }
