@@ -91,7 +91,9 @@ object Main {
     val height = 10
     val iterations = 10
 
-    calculate(workers, WorldGenerator.generate (width, height), iterations)
+    val world: WorldModel = WorldGenerator.generate(width, height)
+    LifeGenerator.applyLife(0.6, world)
+    calculate(workers, world, iterations)
   }
 
   def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {
