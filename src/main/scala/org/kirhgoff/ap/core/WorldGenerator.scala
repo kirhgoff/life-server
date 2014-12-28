@@ -16,5 +16,4 @@ object WorldGenerator {
   }
 
   def generateElement(x:Int, y:Int, world:WorldModel):Element = new Element(x, y, world)
-
 }

@@ -1,10 +1,10 @@
 package org.kirhgoff.ap
 
 import org.kirhgoff.ap.core.{WorldModel, Element, WorldGenerator, WorldPrinter}
+import org.kirhgoff.ap.core._
 import org.specs2.mutable.Specification
-import spray.testkit.Specs2RouteTest
-import spray.http._
-import StatusCodes._
+
+import scala.util.Random
 
 class MainTestSpec extends Specification {
   //def actorRefFactory = system
@@ -87,7 +87,40 @@ class MainTestSpec extends Specification {
       print(world) shouldEqual "00000\n00100\n00100\n00100\n00000"
     }
 
+    "correctly process its state" in {
+      val world = WorldGenerator.generate(10, 10)
+      val element = new Element(50, 50, world)
+
+      element.setAlive(true)
+      element.calculateNewState (make(0)).isAlive shouldEqual false
+      element.calculateNewState (make(1)).isAlive shouldEqual false
+      element.calculateNewState (make(2)).isAlive shouldEqual true //Lives
+      element.calculateNewState (make(3)).isAlive shouldEqual true //lives
+      element.calculateNewState (make(4)).isAlive shouldEqual false
+      element.calculateNewState (make(5)).isAlive shouldEqual false
+      element.calculateNewState (make(6)).isAlive shouldEqual false
+      element.calculateNewState (make(7)).isAlive shouldEqual false
+
+      element.setAlive(false)
+      element.calculateNewState (make(0)).isAlive shouldEqual false
+      element.calculateNewState (make(1)).isAlive shouldEqual false
+      element.calculateNewState (make(2)).isAlive shouldEqual false
+      element.calculateNewState (make(3)).isAlive shouldEqual true //becomes alive
+      element.calculateNewState (make(4)).isAlive shouldEqual false
+      element.calculateNewState (make(5)).isAlive shouldEqual false
+      element.calculateNewState (make(6)).isAlive shouldEqual false
+      element.calculateNewState (make(7)).isAlive shouldEqual false
+
+    }
   }
 
-  def print(world:WorldModel) = new WorldPrinter('1', '0').print(world)
+  def print(world:WorldModel) = new WorldPrinter('1', '0').print(world.getElements)
+  def make(aliveCount:Int) = {
+    val result = Array.ofDim[Boolean](8)
+    //todo find functional solution
+    for (index <- 0 to 7) {
+      result(index) = index < aliveCount
+    }
+    WorldDimension(Random.shuffle(result.toSeq).toArray[Boolean])
+  }
 }
