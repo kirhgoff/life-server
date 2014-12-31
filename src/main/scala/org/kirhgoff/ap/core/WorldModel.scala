@@ -1,14 +1,10 @@
 package org.kirhgoff.ap.core
 
-import org.kirhgoff.ap.core
-
-/**
- * Created by kirilllastovirya on 14/12/14.
- */
-
-case class WorldDimension (aroundSense:Array[Boolean])
+case class WorldDimension (surroundings:Array[Boolean])
 
 class WorldModel(val width:Int, val height:Int) {
+  def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
+
   var elements:List[Element] = List()
 
   /**
@@ -26,8 +22,6 @@ class WorldModel(val width:Int, val height:Int) {
    */
   def giveEnvironmentFor(x: Int, y: Int):WorldDimension = {
     val result = new Array[Boolean] (8)
-    //TODO make indices
-//    val baseIndex = width * y + x
     result(0) = elements(indexFor(x-1, y-1)).isAlive
     result(1) = elements(indexFor(x,   y-1)).isAlive
     result(2) = elements(indexFor(x+1, y-1)).isAlive
@@ -43,7 +37,10 @@ class WorldModel(val width:Int, val height:Int) {
   }
 
 
-  def setElements(elements: List[Element]) = {this.elements = elements}
+  def setElements(elements: List[Element]) = {
+    //println (s"setElements: $elements")
+    this.elements = elements
+  }
 
   def getElements:List[Element] = elements
 

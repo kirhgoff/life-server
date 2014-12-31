@@ -7,18 +7,34 @@ class Element(val x:Int, val y:Int, world:WorldModel) {
   def isAlive = alive
 
   def calculateNewState(value:WorldDimension):Element = {
-    val sum = value.aroundSense.foldLeft(0)(_ + toInt(_))
-
     val newState = new Element (x, y, world)
-    newState.setAlive((alive && (sum == 2 || sum ==3)) || (!alive && sum == 3))
-    //println(this + " newState=" + newState)
+    newState.setAlive(Element.shouldBeAlive(alive, value))
+    //println(s"$this newState=$newState sum=${Element.sum(value)}")
     newState
   }
 
-  def calculateNewState:Element = calculateNewState(world.giveEnvironmentFor(x, y))
+  def calculateNewState():Element = {
+    calculateNewState(world.giveEnvironmentFor(x, y))
+  }
 
-  private def toInt(b: Boolean) = if(b) 1 else 0
   override def toString = s"E[$x, $y, ${if (alive) '0' else '-'}]"
+
+  override def equals(other:Any):Boolean = other match {
+    //TODO compare worldss
+    case that : Element => other.isInstanceOf[Element] && x == that.x && y == that.y && isAlive == that.isAlive
+    case _ => false
+  }
+
+  override def hashCode : Int = 41*(41*(41+x)+y) + Element.toInt(isAlive)
+}
+
+object Element {
+  def toInt(b: Boolean) = if(b) 1 else 0
+  def sum(value:WorldDimension) = value.surroundings.foldLeft(0)(_ + Element.toInt(_))
+  def shouldBeAlive(alive:Boolean, value:WorldDimension) = {
+    val summa = sum(value)
+    (alive && (summa == 2 || summa == 3)) || (!alive && summa == 3)
+  }
 
 }
 
