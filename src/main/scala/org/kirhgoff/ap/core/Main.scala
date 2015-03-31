@@ -71,7 +71,9 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
   def receive = {
     case NewStateIsReady(elements) ⇒ {
       world.setElements(elements)
-      println("New state is ready:\n" + worldPrinter.print(world))
+      //println("New state is ready:\n" + worldPrinter.print(world))
+      worldPrinter.createPicture(world)
+
       iterations += 1
       if (iterations >= iterationCount) {
         worldPrinter.printEndOfTheWorld ()
@@ -86,10 +88,10 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
 object Main {
   def main (args: Array[String]) {
-    val workers = 10
-    val width = 10
-    val height = 10
-    val iterations = 10
+    val workers = 100
+    val width = 100
+    val height = 100
+    val iterations = 1000
 
     val world: WorldModel = WorldGenerator.generate(width, height)
     LifeGenerator.applyLife(0.6, world)

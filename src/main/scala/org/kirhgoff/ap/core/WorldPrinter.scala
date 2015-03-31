@@ -1,13 +1,12 @@
 package org.kirhgoff.ap.core
 
-<<<<<<< HEAD
 import java.awt.Color
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 
-class WorldPrinter(val world:WorldModel, val aliveSymbol:Char, val deadSymbol:Char) {
+class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
   var counter = 0
-  var path = "c:/Tmp/images/"
+  var path = "/tmp/images/"
 
   def printEndOfTheWorld() = {
     println ("============================>End of the world")
@@ -25,11 +24,12 @@ class WorldPrinter(val world:WorldModel, val aliveSymbol:Char, val deadSymbol:Ch
     asci.map(row => row.toList.mkString("")).toList.mkString("\n")
   }
 
-  def createPicture (elements:List[Element]) = {
+  def createPicture (world:WorldModel) = {
     val screenWidth = 500
     val screenHeight = 500
-    val cellWidth = screenWidth/world.width
-    val cellHeight = screenHeight/world.height
+    val cellWidth = screenWidth.toDouble/world.width
+    val cellHeight = screenHeight.toDouble/world.height
+    val elements = world.getElements
 
     val canvas = new BufferedImage(screenWidth, screenHeight, BufferedImage.TYPE_INT_RGB)
     val g = canvas.createGraphics()
@@ -39,13 +39,15 @@ class WorldPrinter(val world:WorldModel, val aliveSymbol:Char, val deadSymbol:Ch
     g.setColor(Color.BLACK)
     elements.map(
       element => {
-        if (element.isAlive) g.fillRect(element.x*cellWidth, element.y*cellHeight, cellWidth, cellHeight)
+        if (element.isAlive) g.fillRect((element.x*cellWidth).toInt, (element.y*cellHeight).toInt, cellWidth.toInt, cellHeight.toInt)
       }
     )
 
     g.dispose()
-    ImageIO.write(canvas, "png", new java.io.File(path + "world" + ))
-
+    ImageIO.write(canvas, "png", new java.io.File(f"${path}world${counter}%04d.png"))
+    counter += 1
   }
+
+
 
 }
