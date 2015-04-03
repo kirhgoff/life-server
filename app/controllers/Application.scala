@@ -11,20 +11,16 @@ import org.kirhgoff.ap.core.LifeGenerator
 
 object Application extends Controller {
 
-  def generate = Action {request =>
-    val command = request.body.validate[StartCommand]
-    command.fold(
-      errors => {
-        BadRequest(Json.obj("status" -> "OK", "message" -> JsError.toFlatJson(errors)))
-      },
-      book => {
-        Ok(Json.toJson(sampleWorld(command.width,command.height,'-','o')))
-      }
-    )
-  }
-
   def index = Action {
     Ok(views.html.react.render("Hello world"));
+  }
+
+  def generate = Action (parse.json) {request =>
+    val commandJsResult = request.body.validate[StartCommand]
+    val command = commandJsResult.getOrElse(StartCommand("10", "10"))
+    val width = Integer.valueOf(command.width)
+    val height = Integer.valueOf(command.height)
+    Ok(Json.toJson(sampleWorld(width,height,'-','o')))
   }
 
   def sampleWorld(width:Int, height:Int, dead:Char, alive:Char) = {

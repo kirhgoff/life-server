@@ -3,7 +3,7 @@
 (function () {
     var LifeWindow = React.createClass({
         render: function() {
-            return <pre>{this.state.data}</pre>;
+            return <pre>{this.props.result}</pre>;
         }
     });
 
@@ -19,13 +19,13 @@
                 JSON.stringify(msg),
                 contentType:"application/json; charset=utf-8", 
                 dataType:"json",
-                success: function (data) {
-                    console.log("success:", data);
-                    this.setState({result:data});
-                },
+                success: this.updateModel,
                 error: function (XMLHttpRequest, textStatus, errorThrown){console.log("error status:", textStatus, "error:", errorThrown);}
             });
-            return false;
+        },
+        updateModel: function(data) {
+            console.log ("Data:", data);
+            this.setState({result:data});
         },
         render: function () { return (
             <div id="footer">
@@ -39,6 +39,10 @@
     });
 
     var LifeMonitor = React.createClass({
+    getInitialState: function () {
+        return { result: ""};
+    },
+
         render: function () { return (
             <div>
                 <LifeWindow/>
