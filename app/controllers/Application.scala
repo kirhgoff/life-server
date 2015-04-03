@@ -11,8 +11,8 @@ import org.kirhgoff.ap.core.LifeGenerator
 
 object Application extends Controller {
 
-  def listBooks = Action {
-    Ok(Json.toJson(books))
+  def generate = Action {
+    Ok(Json.toJson(sampleWorld(10,10,'-','o')))
   }
 
   def saveBook = Action(BodyParsers.parse.json) { request =>
@@ -29,13 +29,12 @@ object Application extends Controller {
   }
 
   def index = Action {
-    Ok(views.html.index.render("Hello world"));
+    Ok(views.html.react.render("Hello world"));
   }
 
-  def check = Action {
-    val world = WorldGenerator.generate(10, 10)
+  def sampleWorld(width:Int, height:Int, dead:Char, alive:Char) = {
+    val world = WorldGenerator.generate(width, height)
     LifeGenerator.applyLife(0.6, world)
-    val result = new WorldPrinter ('-', '0').print(world)
-    Ok(views.html.index.render(result));
+    new WorldPrinter (dead, alive).print(world)
   }
 }
