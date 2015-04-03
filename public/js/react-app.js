@@ -3,7 +3,7 @@
 (function () {
     var LifeWindow = React.createClass({
         render: function() {
-            return <pre></pre>;
+            return <pre>{this.state.data}</pre>;
         }
     });
 
@@ -11,16 +11,18 @@
         handleSubmit: function () {
             var msg = { 
                 width: this.refs.width.getDOMNode().value, 
-                width: this.refs.width.getDOMNode().value
+                height: this.refs.height.getDOMNode().value
             };
-            console.log(msg)
             $.ajax({
                 url: "/generateNewWorld", 
                 type: "POST", data: 
                 JSON.stringify(msg),
                 contentType:"application/json; charset=utf-8", 
                 dataType:"json",
-                success: function (data){console.log("success:", data);},
+                success: function (data) {
+                    console.log("success:", data);
+                    this.setState({result:data});
+                },
                 error: function (XMLHttpRequest, textStatus, errorThrown){console.log("error status:", textStatus, "error:", errorThrown);}
             });
             return false;
@@ -44,9 +46,6 @@
             </div>
             );}
     });
-
-    console.log ("React:", React);
-    console.log ("Document:", document);
 
     React.render(<LifeMonitor />, document.getElementById('life-monitor'));
 })();

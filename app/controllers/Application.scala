@@ -2,7 +2,7 @@ package controllers
 
 import play.api.libs.json._
 import play.api.mvc._
-import models.Book._
+import models.StartCommand._
 
 import org.kirhgoff.ap.core.WorldGenerator
 import org.kirhgoff.ap.core.WorldModel
@@ -11,19 +11,14 @@ import org.kirhgoff.ap.core.LifeGenerator
 
 object Application extends Controller {
 
-  def generate = Action {
-    Ok(Json.toJson(sampleWorld(10,10,'-','o')))
-  }
-
-  def saveBook = Action(BodyParsers.parse.json) { request =>
-    val b = request.body.validate[Book]
-    b.fold(
+  def generate = Action {request =>
+    val command = request.body.validate[StartCommand]
+    command.fold(
       errors => {
         BadRequest(Json.obj("status" -> "OK", "message" -> JsError.toFlatJson(errors)))
       },
       book => {
-        addBook(book)
-        Ok(Json.obj("status" -> "OK"))
+        Ok(Json.toJson(sampleWorld(command.width,command.height,'-','o')))
       }
     )
   }
