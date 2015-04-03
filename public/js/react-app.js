@@ -2,8 +2,11 @@
 
 (function () {
     var LifeWindow = React.createClass({
+        getInitialState: function () {
+            return { result: ""};
+        },
         render: function() {
-            return <pre>{this.props.result}</pre>;
+            return <hr></hr><pre>{this.state.result}</pre><hr></hr>;
         }
     });
 
@@ -39,16 +42,12 @@
     });
 
     var LifeMonitor = React.createClass({
-    getInitialState: function () {
-        return { result: ""};
-    },
-
         render: function () { return (
             <div>
                 <LifeWindow/>
                 <GenerateButton name="Generate" />
             </div>
-            );}
+        );}
     });
 
     React.render(<LifeMonitor />, document.getElementById('life-monitor'));
