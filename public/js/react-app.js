@@ -2,33 +2,17 @@
 
 (function () {
     var LifeWindow = React.createClass({
-        getInitialState: function () {
-            return { result: ""};
-        },
         render: function() {
-            return <hr></hr><pre>{this.state.result}</pre><hr></hr>;
+            return <pre>{this.props.data}</pre>;
         }
     });
 
     var GenerateButton = React.createClass({
         handleSubmit: function () {
-            var msg = { 
-                width: this.refs.width.getDOMNode().value, 
-                height: this.refs.height.getDOMNode().value
-            };
-            $.ajax({
-                url: "/generateNewWorld", 
-                type: "POST", data: 
-                JSON.stringify(msg),
-                contentType:"application/json; charset=utf-8", 
-                dataType:"json",
-                success: this.updateModel,
-                error: function (XMLHttpRequest, textStatus, errorThrown){console.log("error status:", textStatus, "error:", errorThrown);}
-            });
-        },
-        updateModel: function(data) {
-            console.log ("Data:", data);
-            this.setState({result:data});
+            //e.preventDefault();
+            var width = this.refs.width.getDOMNode().value;
+            var height = this.refs.height.getDOMNode().value;
+            this.props.onSubmit(width, height);
         },
         render: function () { return (
             <div id="footer">
@@ -42,10 +26,29 @@
     });
 
     var LifeMonitor = React.createClass({
+        getInitialState: function () {
+            return { data: ""};
+        },
+        handleSubmit: function(width, height) {
+            $.ajax({
+                url: "/generateNewWorld", 
+                type: "POST", 
+                data: JSON.stringify({width:width, height:height}),
+                contentType:"application/json; charset=utf-8", 
+                dataType:"json",
+                success: function (data) {
+                    console.log ("Data:", data);
+                    this.setState({data:data});    
+                },
+                error: function (xhr, textStatus, errorThrown){
+                    console.log("error status:", textStatus, "error:", errorThrown);
+                }
+            });
+        },
         render: function () { return (
             <div>
-                <LifeWindow/>
-                <GenerateButton name="Generate" />
+                <LifeWindow data={this.state.data}/>
+                <GenerateButton name="Generate" onSubmit={this.handleSubmit}/>
             </div>
         );}
     });
