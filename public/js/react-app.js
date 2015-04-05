@@ -39,10 +39,10 @@
                 success: function (data) {
                     console.log ("Data:", data);
                     this.setState({data:data});    
-                },
+                }.bind(this),
                 error: function (xhr, textStatus, errorThrown){
                     console.log("error status:", textStatus, "error:", errorThrown);
-                }
+                }.bind(this)
             });
         },
         render: function () { return (
