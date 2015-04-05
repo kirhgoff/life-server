@@ -60,7 +60,7 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
 }
 
 /**
- * Eployer. Created with a world to run and runs it
+ * Created with a world to run and runs it
  * @param world - world to run
  * @param iterationCount - time till apocalypse
  */
@@ -71,8 +71,8 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
   def receive = {
     case NewStateIsReady(elements) ⇒ {
       world.setElements(elements)
-      //println("New state is ready:\n" + worldPrinter.print(world))
-      worldPrinter.createPicture(world)
+      Application.lifeChannel.push(worldPrinter.print(world))
+      //worldPrinter.createPicture(world)
 
       iterations += 1
       if (iterations >= iterationCount) {
@@ -86,24 +86,18 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 }
 
 
-object Main {
-  def main (args: Array[String]) {
+object LifeActors {
+  val system = ActorSystem("life-model-calculations")
+  val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
+  val master = system.actorOf(Props(new Master(nrOfWorkers, listener)), name = "master")
+
+  def run (width:Integer, height:Integer) {
     val workers = 100
-    val width = 100
-    val height = 100
     val iterations = 1000
+    val lifeRatio = 0.6
 
     val world: WorldModel = WorldGenerator.generate(width, height)
-    LifeGenerator.applyLife(0.6, world)
-    calculate(workers, world, iterations)
-  }
-
-  def calculate(nrOfWorkers: Int, world: WorldModel, iterations: Int) {
-    val system = ActorSystem("Life-model-calculations")
-
-    val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
-    val master = system.actorOf(Props(new Master(nrOfWorkers, listener)), name = "master")
-
+    LifeGenerator.applyLife(lifeRatio, world)
     println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
     master ! CalculateNewState(world.getElements)
   }

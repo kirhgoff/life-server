@@ -5,3 +5,20 @@ body {
 h1 {
     color: lightblue;
 }
+
+#width {
+  width: 100px;
+}
+
+#height {
+  width: 100px;
+}
+
+#start {
+  width: 200px;
+}
+
+#stop {
+  width: 200px;
+}
+
