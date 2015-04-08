@@ -1,4 +1,4 @@
-import akka.ChatActors
+import akka.LifeActors
 import play.api.GlobalSettings
 
 object Global extends GlobalSettings {

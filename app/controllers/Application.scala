@@ -2,7 +2,13 @@ package controllers
 
 import play.api.libs.json._
 import play.api.mvc._
+import play.api.libs.json.JsValue
+import play.api.libs.iteratee.{Concurrent, Enumeratee}
+import play.api.libs.EventSource
+import play.api.libs.concurrent.Execution.Implicits._
+
 import models.StartCommand._
+import akka.LifeActors
 
 import org.kirhgoff.ap.core.WorldGenerator
 import org.kirhgoff.ap.core.WorldModel
@@ -30,6 +36,7 @@ object Application extends Controller {
 
   def stop = Action {
     LifeActors.stop
+    Ok("Stopped")
   }
 
   def lifeFeed() = Action { request =>
@@ -37,7 +44,7 @@ object Application extends Controller {
     Ok.feed(lifeOut
 //      &> filter(room) 
 //      &> Concurrent.buffer(50) 
-      &> connDeathWatch(req.remoteAddress)
+      &> connDeathWatch(request.remoteAddress)
       &> EventSource()
     ).as("text/event-stream") 
   }

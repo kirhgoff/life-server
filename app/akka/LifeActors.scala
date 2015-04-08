@@ -1,9 +1,14 @@
-package org.kirhgoff.ap.core
+package akka
 
+import play.api.libs.json._
 import akka.actor.{ActorSystem, ActorRef, Props, Actor}
 import akka.routing.{RoundRobinPool, RoundRobinRouter}
 
 import scala.collection.mutable
+import controllers.Application
+import models.World
+
+import org.kirhgoff.ap.core._
 
 sealed trait RunnerMessage
 
@@ -71,7 +76,7 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
   def receive = {
     case NewStateIsReady(elements) ⇒ {
       world.setElements(elements)
-      Application.lifeChannel.push(worldPrinter.print(world))
+      Application.lifeChannel.push(Json.toJson(World(worldPrinter.print(world))))
       //worldPrinter.createPicture(world)
 
       iterations += 1
@@ -88,8 +93,6 @@ class Listener(world:WorldModel, iterationCount:Int) extends Actor {
 
 object LifeActors {
   val system = ActorSystem("life-model-calculations")
-  val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
-  val master = system.actorOf(Props(new Master(nrOfWorkers, listener)), name = "master")
 
   def run (width:Integer, height:Integer) {
     val workers = 100
@@ -99,6 +102,12 @@ object LifeActors {
     val world: WorldModel = WorldGenerator.generate(width, height)
     LifeGenerator.applyLife(lifeRatio, world)
     println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
+  
+    val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
+    val master = system.actorOf(Props(new Master(workers, listener)), name = "master")
+
     master ! CalculateNewState(world.getElements)
   }
+
+  def stop = {} //TODO
 }

@@ -32,12 +32,25 @@
     });
 
     var LifeMonitor = React.createClass({
+        componentWillMount: function () {
+            this.listen();
+        },
         getInitialState: function () {
             return { data: ""};
         },
+        listen: function () {
+            var chatFeed;            // holds SSE streaming connection for chat messages for current room
+            return function() {   // returns function that takes room as argument
+                if (chatFeed) { chatFeed.close(); }    // if initialized, close before starting new connection
+                chatFeed = new EventSource("/lifeFeed");       // (re-)initializes connection
+                chatFeed.addEventListener("message", this.drawWorld, false);  // attach addMsg event handler
+        },
+        drawWorld: function (msg) {
+            this.setState({data: JSON.parse(msg.data)}); 
+        },
         handleStart: function(width, height) {
             $.ajax({
-                url: "/startNewWorld", 
+                url: "/start", 
                 type: "POST", 
                 data: JSON.stringify({width:width, height:height}),
                 contentType:"application/json; charset=utf-8", 
@@ -51,21 +64,8 @@
                 }.bind(this)
             });
         },
-        handleStart: function(width, height) {
-            $.ajax({
-                url: "/stopWorld", 
-                type: "POST", 
-                data: JSON.stringify({width:width, height:height}),
-                contentType:"application/json; charset=utf-8", 
-                dataType:"json",
-                success: function (data) {
-                    console.log ("Data:", data);
-                    this.setState({data:data});    
-                }.bind(this),
-                error: function (xhr, textStatus, errorThrown){
-                    console.log("error status:", textStatus, "error:", errorThrown);
-                }.bind(this)
-            });
+        handleStop: function() {
+            $.get("/stop");
         },
 
         render: function () { return (
