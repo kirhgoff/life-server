@@ -15,7 +15,7 @@
             this.props.onStart(width, height);
             //TODO set disabled, enable stop
         },
-        handleStop: {
+        handleStop: function() {
             this.props.onStop();
             //TODO set disabled, enable start
         },
@@ -39,11 +39,12 @@
             return { data: ""};
         },
         listen: function () {
-            var chatFeed;            // holds SSE streaming connection for chat messages for current room
-            return function() {   // returns function that takes room as argument
-                if (chatFeed) { chatFeed.close(); }    // if initialized, close before starting new connection
-                chatFeed = new EventSource("/lifeFeed");       // (re-)initializes connection
-                chatFeed.addEventListener("message", this.drawWorld, false);  // attach addMsg event handler
+          var chatFeed;            // holds SSE streaming connection for chat messages for current room
+          return function() {   // returns function that takes room as argument
+              if (chatFeed) { chatFeed.close(); }    // if initialized, close before starting new connection
+              chatFeed = new EventSource("/lifeFeed");       // (re-)initializes connection
+              chatFeed.addEventListener("message", this.drawWorld, false);  // attach addMsg event handler
+          }
         },
         drawWorld: function (msg) {
             this.setState({data: JSON.parse(msg.data)}); 
@@ -67,7 +68,6 @@
         handleStop: function() {
             $.get("/stop");
         },
-
         render: function () { return (
             <div>
                 <LifeWindow data={this.state.data}/>
