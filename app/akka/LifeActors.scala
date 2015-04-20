@@ -1,7 +1,7 @@
 package akka
 
 import play.api.libs.json._
-import akka.actor.{ActorSystem, ActorRef, Props, Actor}
+import akka.actor._
 import akka.routing.{RoundRobinPool, RoundRobinRouter}
 
 import scala.collection.mutable
@@ -12,20 +12,21 @@ import org.kirhgoff.ap.core._
 
 sealed trait RunnerMessage
 
+case class InitWorld(world:WorldModel, iterations:Int) extends RunnerMessage
 case class CalculateNewState(elements:List[Element]) extends RunnerMessage
-case class Work(element:Element) extends RunnerMessage
-case class Result(newElement:Element) extends RunnerMessage
-case class NewStateIsReady(elements:List[Element]) extends RunnerMessage
+case class ProcessElement(element:Element) extends RunnerMessage
+case class ElementUpdated(newElement:Element) extends RunnerMessage
+case class WorldUpdated(elements:List[Element]) extends RunnerMessage
 
 /**
  * Worker class - actor to calculate elements
  */
 class Worker extends Actor {
   def receive = {
-    case Work(element:Element) ⇒ {
-      val newState = element.calculateNewState
+    case ProcessElement(element:Element) ⇒ {
+      val newState = element.calculateNewState()
       //println("Worker:" + element + "->" + newState)
-      sender ! Result(newState)
+      sender ! ElementUpdated(newState)
     }
   }
 }
@@ -33,31 +34,31 @@ class Worker extends Actor {
 /**
  * Master - splits a task to calculate world into separate tasks
  * @param nrOfWorkers - how many workers to use
- * @param listener - the employer
  */
-class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
-
+class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
   val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
   var numberOfResults:Int = _
   var newElements:mutable.MutableList[Element] = mutable.MutableList()
+  var operator:ActorRef = null
 
   def receive = {
     //Make sure we are in correct state
     case CalculateNewState(_) if numberOfResults != 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 0")
-    case Result(_) if numberOfResults == 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 1")
+    case ElementUpdated(_) if numberOfResults == 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 1")
 
     //The logic itself
     case CalculateNewState(elements) => {
-      //println("Calculating new state")
+      //println("CalculateNewState")
       numberOfResults = elements.length
-      elements.map(workerRouter ! Work(_))
+      operator = sender
+      elements.map(workerRouter ! ProcessElement(_))
     }
-    case Result(newElement) => {
+    case ElementUpdated(newElement) => {
       //println ("Result received:" + newElement)
       newElements += newElement
       numberOfResults -= 1
       if (numberOfResults == 0) {
-        listener ! NewStateIsReady(newElements.toList)
+        operator ! WorldUpdated(newElements.toList)
         newElements = mutable.MutableList()        
       }
     }
@@ -66,47 +67,60 @@ class Master(nrOfWorkers: Int, listener: ActorRef)  extends Actor {
 
 /**
  * Created with a world to run and runs it
- * @param world - world to run
- * @param iterationCount - time till apocalypse
  */
-class Listener(world:WorldModel, iterationCount:Int) extends Actor {
+class CalculatingOperator(val workers: Int) extends Actor {
   var iterations:Int = 0
-  var worldPrinter:WorldPrinter = new WorldPrinter ('0', '-')
+  var currentIteration:Int = 0
+  var worldPrinter:WorldPrinter = new WorldPrinter ('*', ' ')
+  var world:WorldModel = null
+  val master = LifeActors.system.actorOf(Props(new AggregatingMaster(workers)), name = "master")
 
   def receive = {
-    case NewStateIsReady(elements) ⇒ {
+    case WorldUpdated(elements) ⇒ {
+      //println ("operator.WorldUpdated")
       world.setElements(elements)
-      Application.lifeChannel.push(Json.toJson(World(worldPrinter.print(world))))
-      //worldPrinter.createPicture(world)
+      val stringWorld: String = worldPrinter.print(world)
+      //println(s"-------------\n$stringWorld")
+      Application.lifeChannel.push(Json.toJson(World(stringWorld)))
 
-      iterations += 1
-      if (iterations >= iterationCount) {
+      currentIteration += 1
+      if (currentIteration >= iterations) {
         worldPrinter.printEndOfTheWorld ()
-        context.system.shutdown()
+        iterations = 0
+        currentIteration = 0
       } else {
+        Thread.sleep(100)
         sender ! CalculateNewState(elements)
       }
+    }
+    case InitWorld(world:WorldModel, iterations:Int) => {
+      //println ("operator.InitWord")
+      this.world = world
+      this.iterations = iterations
+      this.currentIteration = 0
+
+      Application.lifeChannel.push(Json.toJson(World(worldPrinter.print(world))))
+      master ! CalculateNewState(world.getElements)
     }
   }
 }
 
 
 object LifeActors {
+  val workers = 100
+  val iterations = 1000
+  val lifeRatio = 0.6
+
   val system = ActorSystem("life-model-calculations")
+  val operator = system.actorOf(Props(new CalculatingOperator(workers)), name = "listener")
 
   def run (width:Integer, height:Integer) {
-    val workers = 100
-    val iterations = 1000
-    val lifeRatio = 0.6
 
     val world: WorldModel = WorldGenerator.generate(width, height)
     LifeGenerator.applyLife(lifeRatio, world)
     println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
-  
-    val listener = system.actorOf(Props(new Listener(world, iterations)), name = "listener")
-    val master = system.actorOf(Props(new Master(workers, listener)), name = "master")
 
-    master ! CalculateNewState(world.getElements)
+    operator ! InitWorld(world, iterations)
   }
 
   def stop = {} //TODO

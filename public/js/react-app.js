@@ -3,7 +3,7 @@
 (function () {
     var LifeWindow = React.createClass({
         render: function() {
-            return <pre>{this.props.data}</pre>;
+            return <pre id="display">{this.props.data}</pre>;
         }
     });
 
@@ -33,20 +33,24 @@
 
     var LifeMonitor = React.createClass({
         componentWillMount: function () {
+            console.log("Component will mount");
             this.listen();
         },
         getInitialState: function () {
             return { data: ""};
         },
         listen: function () {
-          var chatFeed;            // holds SSE streaming connection for chat messages for current room
-          return function() {   // returns function that takes room as argument
-              if (chatFeed) { chatFeed.close(); }    // if initialized, close before starting new connection
-              chatFeed = new EventSource("/lifeFeed");       // (re-)initializes connection
-              chatFeed.addEventListener("message", this.drawWorld, false);  // attach addMsg event handler
+          console.log("listen called")
+          var lifeFeed;
+          return function() {
+              if (lifeFeed) { lifeFeed.close(); }    // if initialized, close before starting new connection
+              lifeFeed = new EventSource("/lifeFeed");       // (re-)initializes connection
+              lifeFeed.addEventListener("message", this.drawWorld, false);  // attach addMsg event handler
+              console.log("Created listener for lifeFeed")
           }
-        },
+        }(),
         drawWorld: function (msg) {
+            //console.log ("Message:", msg);
             this.setState({data: JSON.parse(msg.data)}); 
         },
         handleStart: function(width, height) {
@@ -55,14 +59,14 @@
                 type: "POST", 
                 data: JSON.stringify({width:width, height:height}),
                 contentType:"application/json; charset=utf-8", 
-                dataType:"json",
-                success: function (data) {
-                    console.log ("Data:", data);
-                    this.setState({data:data});    
-                }.bind(this),
-                error: function (xhr, textStatus, errorThrown){
-                    console.log("error status:", textStatus, "error:", errorThrown);
-                }.bind(this)
+                dataType:"json"//,
+//                success: function (data) {
+//                    console.log ("Data:", data);
+//                    this.setState({data:data});
+//                }.bind(this),
+//                error: function (xhr, textStatus, errorThrown){
+//                    console.log("error status:", textStatus, "error:", errorThrown);
+//                }.bind(this)
             });
         },
         handleStop: function() {

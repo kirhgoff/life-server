@@ -8,3 +8,5 @@ test-output/
 *.iml
 .classpath_nb
 .DS_Store
+logs/
+
