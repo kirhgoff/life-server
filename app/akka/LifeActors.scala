@@ -108,7 +108,7 @@ class CalculatingOperator(val workers: Int) extends Actor {
 
 object LifeActors {
   val workers = 100
-  val iterations = 1000
+  val iterations = 100
   val lifeRatio = 0.6
 
   val system = ActorSystem("life-model-calculations")
