@@ -4,11 +4,17 @@
     <head>
         <title>@title</title>
         <link rel="stylesheet" media="screen" href="assets/stylesheets/stylesheet.css">
-        <!--link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))"-->
+        <link rel="stylesheet" media="screen" href='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))'>
+
     </head>
     <body>
+    <div class="container">
+        <div class="jumbotron">
+            <h1>Life Monitor</h1>
+            <p>Press the button and watch the life in progress</p>
+        </div>
         <div id="life-monitor"></div>
-
+    </div>
         <script src="/assets/js/vendor/eventsource.js"></script>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/react/0.13.1/react.js"></script>

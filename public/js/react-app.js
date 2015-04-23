@@ -88,8 +88,8 @@
     var ControlPanel = React.createClass({
         handleStart: function () {
             //e.preventDefault();
-            var width = this.refs.width.getDOMNode().value;
-            var height = this.refs.height.getDOMNode().value;
+            var width = this.refs.inputWidth.getDOMNode().value;
+            var height = this.refs.inputHeight.getDOMNode().value;
             this.props.onStart(width, height);
             //TODO set disabled, enable stop
         },
@@ -98,13 +98,32 @@
             //TODO set disabled, enable start
         },
         render: function () { return (
-            <div id="footer">
-                <form onSubmit={this.handleSubmit}>
-                    <input type="text" id="width" ref="width" placeholder="Width..." className="input-block-level" />                
-                    <input type="text" id="height" ref="height" placeholder="Height..." className="input-block-level" />
-                    <input type="button" id="start" className="btn btn-primary" value="Start" onClick={this.handleStart} />
+//            <div id="footer">
+//                <form onSubmit={this.handleSubmit}>
+//                    <input type="text" id="width" ref="width" placeholder="Width..." className="input-block-level" />
+//                    <input type="text" id="height" ref="height" placeholder="Height..." className="input-block-level" />
+//                    <input type="button" id="start" className="btn btn-primary" value="Start" onClick={this.handleStart} />
+//                </form>
+//            </div>
+                <form className="form-horizontal">
+                  <div className="form-group">
+                    <label htmlFor="inputWidth" className="col-sm-2 control-label">Width</label>
+                    <div className="col-sm-10">
+                      <input type="number" className="form-control" ref="inputWidth" id="inputWidth" placeholder="5"/>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="inputHeight" className="col-sm-2 control-label">Height</label>
+                    <div className="col-sm-10">
+                      <input type="number" className="form-control" ref="inputHeight" id="inputHeight" placeholder="5"/>
+                    </div>
+                  </div>
+                  <div className="form-group">
+                    <div className="col-sm-offset-2 col-sm-10">
+                      <button type="button" className="btn btn-default" onClick={this.handleStart}>Start</button>
+                    </div>
+                  </div>
                 </form>
-            </div>
             );}
     });
 
@@ -117,12 +136,6 @@
         },
         getInitialState: function () {
             return {};
-//            return { data: [
-//                    [' ', '*', '_'],
-//                    [' ', '*', '*'],
-//                    ['*', '*', '_']
-//                ]
-//            };
         },
         listen: function () {
           console.log("listen called")
