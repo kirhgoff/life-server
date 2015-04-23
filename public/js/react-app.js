@@ -13,10 +13,13 @@
         },
 
         paint: function(context) {
+            var data = this.prepareData();
+            console.log ("paint:", data);
+            if (!data) return;
+
             var width = context.canvas.width - 2;
             var height = context.canvas.height - 2;
 
-            var data = this.prepareData();
             var cellWidth = width/data.columns;
             var cellHeight = height/data.rows;
 
@@ -59,7 +62,9 @@
         isAlive: function (value) {return value == '*';},
 
         prepareData: function () {
+            console.log("prepareData:", this.props.data);
             var data = this.props.data;
+            if (!data) return undefined;
             console.log ("Data is: ", data);
             console.log ("data[0]:", data[0]);
             return {columns:data[0].length, rows:data.length, cells:data};
@@ -111,12 +116,13 @@
             this.listen();
         },
         getInitialState: function () {
-            return { data: [
-                    [' ', '*', '_'],
-                    [' ', '*', '*'],
-                    ['*', '*', '_']
-                ]
-            };
+            return {};
+//            return { data: [
+//                    [' ', '*', '_'],
+//                    [' ', '*', '*'],
+//                    ['*', '*', '_']
+//                ]
+//            };
         },
         listen: function () {
           console.log("listen called")

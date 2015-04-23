@@ -5,16 +5,18 @@ import play.api.libs.functional.syntax._
 import play.api.data.validation._
 
 object StartCommand {
+  case class StartCommand(width: Int, height: Int, iterations:Option[Int])
 
-  case class StartCommand(width: String, height: String)
+  implicit val startCommandWrites: Writes[StartCommand] = (
+    (__ \ "width").write[Int] and
+    (__ \ "height").write[Int] and
+    (__ \ "iterations").writeNullable[Int]
+  )(unlift(StartCommand.unapply))
 
-  // implicit val startCommandWrites = Json.writes[StartCommand]
-
-  // implicit val startCommandReads:Reads[StartCommand] = (
-  //       (JsPath \ "width").read[Integer] and
-  //       (JsPath \ "height").read[Integer]
-  //   )(StartCommand.apply _)
-  implicit val startCommandWrites = Json.writes[StartCommand]
-  implicit val startCommandReads = Json.reads[StartCommand]
+  implicit val startCommandReads: Reads[StartCommand] = (
+    (__ \ "width").read[Int] and
+    (__ \ "height").read[Int] and
+    (__ \ "iterations").readNullable[Int]
+  )(StartCommand.apply _)
 
 }

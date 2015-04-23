@@ -8,10 +8,10 @@ class ModelSpec extends Specification {
 
   "Model should be able to" should {
     "read/write as Json" in {
-      val json = Json.parse("{\"width\":\"10\", \"height\":\"10\"}")
+      val json = Json.parse("{\"width\":10, \"height\":10}")
       val command = json.as[StartCommand]
-      command.width shouldEqual "10"
-      command.height shouldEqual "10"
+      command.width shouldEqual 10
+      command.height shouldEqual 10
     }
   }
 }
