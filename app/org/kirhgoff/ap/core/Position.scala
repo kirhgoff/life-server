@@ -1,5 +1,5 @@
 package org.kirhgoff.ap.core
 
-trait WorldGeometry {
+trait Position {
 
 }
