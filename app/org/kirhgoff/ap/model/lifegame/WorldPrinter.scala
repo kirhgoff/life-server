@@ -1,4 +1,4 @@
-package org.kirhgoff.ap.core
+package org.kirhgoff.ap.model.lifegame
 
 import java.awt.Color
 import java.awt.image.BufferedImage

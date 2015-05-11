@@ -1,4 +1,4 @@
-package org.kirhgoff.ap.core
+package org.kirhgoff.ap.model.lifegame
 
 import scala.util.Random
 

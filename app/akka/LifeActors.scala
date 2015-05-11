@@ -1,5 +1,6 @@
 package akka
 
+import org.kirhgoff.ap.model.lifegame._
 import play.api.libs.json._
 import akka.actor._
 import akka.routing.{RoundRobinPool, RoundRobinRouter}

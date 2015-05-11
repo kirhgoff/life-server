@@ -1,7 +1,8 @@
 package scala
 
-import org.kirhgoff.ap.core.{WorldModel, Element, WorldGenerator, WorldPrinter}
+import org.kirhgoff.ap.core.WorldPrinter
 import org.kirhgoff.ap.core._
+import org.kirhgoff.ap.model.lifegame._
 import org.specs2.mutable.Specification
 
 import scala.util.Random

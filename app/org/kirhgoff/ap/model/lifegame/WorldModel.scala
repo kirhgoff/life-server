@@ -1,4 +1,4 @@
-package org.kirhgoff.ap.core
+package org.kirhgoff.ap.model.lifegame
 
 case class WorldDimension (surroundings:Array[Boolean])
 

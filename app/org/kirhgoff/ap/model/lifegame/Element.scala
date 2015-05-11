@@ -1,4 +1,4 @@
-package org.kirhgoff.ap.core
+package org.kirhgoff.ap.model.lifegame
 
 class Element(val x:Int, val y:Int, world:WorldModel) {
   var alive:Boolean = false
