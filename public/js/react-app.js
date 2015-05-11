@@ -77,14 +77,6 @@
 
     //---------------------------------------------------------------
 
-    var LifeWindow = React.createClass({
-        render: function() {
-            return <pre id="display">{this.props.data}</pre>;
-        }
-    });
-
-    //---------------------------------------------------------------
-
     var ControlPanel = React.createClass({
         handleStart: function () {
             //e.preventDefault();
@@ -98,33 +90,26 @@
             //TODO set disabled, enable start
         },
         render: function () { return (
-//            <div id="footer">
-//                <form onSubmit={this.handleSubmit}>
-//                    <input type="text" id="width" ref="width" placeholder="Width..." className="input-block-level" />
-//                    <input type="text" id="height" ref="height" placeholder="Height..." className="input-block-level" />
-//                    <input type="button" id="start" className="btn btn-primary" value="Start" onClick={this.handleStart} />
-//                </form>
-//            </div>
-                <form className="form-horizontal">
-                  <div className="form-group">
-                    <label htmlFor="inputWidth" className="col-sm-2 control-label">Width</label>
-                    <div className="col-sm-10">
-                      <input type="number" className="form-control" ref="inputWidth" id="inputWidth" placeholder="5"/>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="inputHeight" className="col-sm-2 control-label">Height</label>
-                    <div className="col-sm-10">
-                      <input type="number" className="form-control" ref="inputHeight" id="inputHeight" placeholder="5"/>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <div className="col-sm-offset-2 col-sm-10">
-                      <button type="button" className="btn btn-default" onClick={this.handleStart}>Start</button>
-                    </div>
-                  </div>
-                </form>
-            );}
+            <form className="form-horizontal">
+              <div className="form-group">
+                <label htmlFor="inputWidth" className="col-sm-2 control-label">Width</label>
+                <div className="col-sm-10">
+                  <input type="number" className="form-control" ref="inputWidth" id="inputWidth" placeholder="5"/>
+                </div>
+              </div>&nbsp;
+              <div className="form-group">
+                <label htmlFor="inputHeight" className="col-sm-2 control-label">Height</label>
+                <div className="col-sm-10">
+                  <input type="number" className="form-control" ref="inputHeight" id="inputHeight" placeholder="5"/>
+                </div>
+              </div>&nbsp;
+              <div className="form-group">
+                <div className="col-sm-offset-2 col-sm-10">
+                  <button type="button" className="btn btn-default" onClick={this.handleStart}>Start</button>
+                </div>
+              </div>
+            </form>
+        );}
     });
 
     //---------------------------------------------------------------
@@ -177,7 +162,7 @@
             $.get("/stop");
         },
         render: function () { return (
-            <div>
+            <div className="container">
                 <LifeCanvas data={this.state.data}/>
                 <ControlPanel onStart={this.handleStart} onStop={this.handleStop}/>
             </div>
