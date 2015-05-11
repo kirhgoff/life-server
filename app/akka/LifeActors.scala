@@ -14,17 +14,17 @@ import org.kirhgoff.ap.core._
 sealed trait RunnerMessage
 
 case class InitWorld(world:WorldModel, iterations:Int) extends RunnerMessage
-case class CalculateNewState(elements:List[Element]) extends RunnerMessage
-case class ProcessElement(element:Element) extends RunnerMessage
-case class ElementUpdated(newElement:Element) extends RunnerMessage
-case class WorldUpdated(elements:List[Element]) extends RunnerMessage
+case class CalculateNewState(elements:List[LifeGameElement]) extends RunnerMessage
+case class ProcessElement(element:LifeGameElement) extends RunnerMessage
+case class ElementUpdated(newElement:LifeGameElement) extends RunnerMessage
+case class WorldUpdated(elements:List[LifeGameElement]) extends RunnerMessage
 
 /**
  * Worker class - actor to calculate elements
  */
 class Worker extends Actor {
   def receive = {
-    case ProcessElement(element:Element) ⇒ {
+    case ProcessElement(element:LifeGameElement) ⇒ {
       val newState = element.calculateNewState()
       //println("Worker:" + element + "->" + newState)
       sender ! ElementUpdated(newState)
@@ -39,7 +39,7 @@ class Worker extends Actor {
 class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
   val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
   var numberOfResults:Int = _
-  var newElements:mutable.MutableList[Element] = mutable.MutableList()
+  var newElements:mutable.MutableList[LifeGameElement] = mutable.MutableList()
   var operator:ActorRef = null
 
   def receive = {

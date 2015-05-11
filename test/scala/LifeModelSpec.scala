@@ -61,9 +61,9 @@ class LifeModelSpec extends Specification {
       val world = WorldGenerator.generate (3, 3)
       world.getElementAt(1, 1).setAlive(true)
 
-      Element.sum(world.giveEnvironmentFor(1, 1)) shouldEqual 0
-      Element.sum(world.giveEnvironmentFor(0, 1)) shouldEqual 1
-      Element.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 1
+      LifeGameElement.sum(world.giveEnvironmentFor(1, 1)) shouldEqual 0
+      LifeGameElement.sum(world.giveEnvironmentFor(0, 1)) shouldEqual 1
+      LifeGameElement.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 1
     }
 
     "give surroundings correctly 2" in {
@@ -72,22 +72,22 @@ class LifeModelSpec extends Specification {
       world.getElementAt(2, 2).setAlive(true)
       world.getElementAt(3, 2).setAlive(true)
 
-      Element.sum(world.giveEnvironmentFor(1, 2)) shouldEqual 1
-      Element.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 2
-      Element.sum(world.giveEnvironmentFor(3, 2)) shouldEqual 1
+      LifeGameElement.sum(world.giveEnvironmentFor(1, 2)) shouldEqual 1
+      LifeGameElement.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 2
+      LifeGameElement.sum(world.giveEnvironmentFor(3, 2)) shouldEqual 1
 
-      Element.sum(world.giveEnvironmentFor(2, 1)) shouldEqual 3
-      Element.sum(world.giveEnvironmentFor(2, 3)) shouldEqual 3
+      LifeGameElement.sum(world.giveEnvironmentFor(2, 1)) shouldEqual 3
+      LifeGameElement.sum(world.giveEnvironmentFor(2, 3)) shouldEqual 3
     }
 
     "order elements correctly in array" in {
       val world = WorldGenerator.generate (2, 2)
       val elements = world.getElements
       elements.length shouldEqual 4
-      elements(0) shouldEqual new Element(0, 0, world)
-      elements(1) shouldEqual new Element(1, 0, world)
-      elements(2) shouldEqual new Element(0, 1, world)
-      elements(3) shouldEqual new Element(1, 1, world)
+      elements(0) shouldEqual new LifeGameElement(0, 0, world)
+      elements(1) shouldEqual new LifeGameElement(1, 0, world)
+      elements(2) shouldEqual new LifeGameElement(0, 1, world)
+      elements(3) shouldEqual new LifeGameElement(1, 1, world)
     }
 
     "return correct elements" in {
@@ -144,11 +144,11 @@ class LifeModelSpec extends Specification {
 
       print(world) shouldEqual "00000\n00000\n01110\n00000\n00000"
 
-      val elem: Element = world.getElementAt(1, 2)
+      val elem: LifeGameElement = world.getElementAt(1, 2)
       val value = world.giveEnvironmentFor(1, 2)
       elem.isAlive shouldEqual true
-      Element.sum(value) shouldEqual 1
-      Element.shouldBeAlive(true, value) shouldEqual false
+      LifeGameElement.sum(value) shouldEqual 1
+      LifeGameElement.shouldBeAlive(true, value) shouldEqual false
 
       elem.calculateNewState().isAlive shouldEqual false
       world.getElementAt(2, 2).calculateNewState().isAlive shouldEqual true
@@ -164,7 +164,7 @@ class LifeModelSpec extends Specification {
 
     "correctly process its state" in {
       val world = WorldGenerator.generate(10, 10)
-      val element = new Element(50, 50, world)
+      val element = new LifeGameElement(50, 50, world)
 
       element.setAlive(true)
       element.calculateNewState (make(0)).isAlive shouldEqual false

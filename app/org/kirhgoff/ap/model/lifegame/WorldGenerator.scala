@@ -15,5 +15,5 @@ object WorldGenerator {
     world
   }
 
-  def generateElement(x:Int, y:Int, world:WorldModel):Element = new Element(x, y, world)
+  def generateElement(x:Int, y:Int, world:WorldModel):LifeGameElement = new LifeGameElement(x, y, world)
 }

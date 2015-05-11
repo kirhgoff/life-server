@@ -5,7 +5,7 @@ case class WorldDimension (surroundings:Array[Boolean])
 class WorldModel(val width:Int, val height:Int) {
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
 
-  var elements:List[Element] = List()
+  var elements:List[LifeGameElement] = List()
 
   /**
    *
@@ -37,12 +37,12 @@ class WorldModel(val width:Int, val height:Int) {
   }
 
 
-  def setElements(elements: List[Element]) = {
+  def setElements(elements: List[LifeGameElement]) = {
     //println (s"setElements: $elements")
     this.elements = elements
   }
 
-  def getElements:List[Element] = elements
+  def getElements:List[LifeGameElement] = elements
 
   def indexFor(x:Int, y:Int) = {
     var newX  = x

@@ -17,7 +17,7 @@ class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
     //println ("Elements:" + elements.size)
     val asci:Array[Array[Char]] = Array.ofDim[Char](world.width, world.height)
     elements.map{
-      e:Element => {
+      e:LifeGameElement => {
         asci(e.y)(e.x) = if (e.isAlive) aliveSymbol else deadSymbol
       }
     }
