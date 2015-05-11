@@ -2,7 +2,7 @@ package org.kirhgoff.ap.model.lifegame
 
 case class WorldDimension (surroundings:Array[Boolean])
 
-class WorldModel(val width:Int, val height:Int) {
+class LifeGameWorldModel(val width:Int, val height:Int) {
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
 
   var elements:List[LifeGameElement] = List()

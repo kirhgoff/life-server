@@ -1,6 +1,6 @@
 package org.kirhgoff.ap.model.lifegame
 
-class LifeGameElement(val x:Int, val y:Int, world:WorldModel) {
+class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) {
   var alive:Boolean = false
 
   def setAlive(alive: Boolean) = {this.alive = alive}

@@ -13,7 +13,7 @@ import org.kirhgoff.ap.core._
 
 sealed trait RunnerMessage
 
-case class InitWorld(world:WorldModel, iterations:Int) extends RunnerMessage
+case class InitWorld(world:LifeGameWorldModel, iterations:Int) extends RunnerMessage
 case class CalculateNewState(elements:List[LifeGameElement]) extends RunnerMessage
 case class ProcessElement(element:LifeGameElement) extends RunnerMessage
 case class ElementUpdated(newElement:LifeGameElement) extends RunnerMessage
@@ -73,7 +73,7 @@ class CalculatingOperator(val workers: Int) extends Actor {
   var iterations:Int = 0
   var currentIteration:Int = 0
   var worldPrinter:WorldPrinter = new WorldPrinter ('*', ' ')
-  var world:WorldModel = null
+  var world:LifeGameWorldModel = null
   val master = LifeActors.system.actorOf(Props(new AggregatingMaster(workers)), name = "master")
 
   def receive = {
@@ -94,7 +94,7 @@ class CalculatingOperator(val workers: Int) extends Actor {
         sender ! CalculateNewState(elements)
       }
     }
-    case InitWorld(world:WorldModel, iterations:Int) => {
+    case InitWorld(world:LifeGameWorldModel, iterations:Int) => {
       //println ("operator.InitWord")
       this.world = world
       this.iterations = iterations
@@ -116,7 +116,7 @@ object LifeActors {
 
   def run (width:Integer, height:Integer, iterations:Int) {
 
-    val world: WorldModel = WorldGenerator.generate(width, height)
+    val world: LifeGameWorldModel = WorldGenerator.generate(width, height)
     LifeGenerator.applyLife(lifeRatio, world)
     println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
 

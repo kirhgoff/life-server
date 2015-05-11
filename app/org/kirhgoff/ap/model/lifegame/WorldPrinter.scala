@@ -12,7 +12,7 @@ class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
     println ("============================>End of the world")
   }
 
-  def print(world:WorldModel) = {
+  def print(world:LifeGameWorldModel) = {
     val elements = world.getElements
     //println ("Elements:" + elements.size)
     val asci:Array[Array[Char]] = Array.ofDim[Char](world.width, world.height)
@@ -24,7 +24,7 @@ class WorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) {
     asci.map(row => row.toList.mkString("")).toList.mkString("\n")
   }
 
-  def createPicture (world:WorldModel) = {
+  def createPicture (world:LifeGameWorldModel) = {
     val screenWidth = 500
     val screenHeight = 500
     val cellWidth = screenWidth.toDouble/world.width

@@ -2,8 +2,8 @@ package org.kirhgoff.ap.model.lifegame
 
 object WorldGenerator {
 
-  def generate(width:Int, height:Int):WorldModel = {
-    val world = new WorldModel(width, height)
+  def generate(width:Int, height:Int):LifeGameWorldModel = {
+    val world = new LifeGameWorldModel(width, height)
     val elementsSeq = for {
       y <- 0 until height
       x <- 0 until width
@@ -15,5 +15,5 @@ object WorldGenerator {
     world
   }
 
-  def generateElement(x:Int, y:Int, world:WorldModel):LifeGameElement = new LifeGameElement(x, y, world)
+  def generateElement(x:Int, y:Int, world:LifeGameWorldModel):LifeGameElement = new LifeGameElement(x, y, world)
 }

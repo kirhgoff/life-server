@@ -189,7 +189,7 @@ class LifeModelSpec extends Specification {
     }
   }
 
-  def print(world:WorldModel) = new WorldPrinter('1', '0').print(world)
+  def print(world:LifeGameWorldModel) = new WorldPrinter('1', '0').print(world)
 
   def make(aliveCount:Int) = {
     val result = Array.ofDim[Boolean](8)
