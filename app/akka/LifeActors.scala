@@ -13,11 +13,11 @@ import org.kirhgoff.ap.core._
 
 sealed trait RunnerMessage
 
-case class InitWorld(world:LifeGameWorldModel, iterations:Int) extends RunnerMessage
-case class CalculateNewState(elements:List[LifeGameElement]) extends RunnerMessage
-case class ProcessElement(element:LifeGameElement) extends RunnerMessage
-case class ElementUpdated(newElement:LifeGameElement) extends RunnerMessage
-case class WorldUpdated(elements:List[LifeGameElement]) extends RunnerMessage
+case class InitWorld(world:WorldModel, iterations:Int) extends RunnerMessage
+case class CalculateNewState(elements:List[Element]) extends RunnerMessage
+case class ProcessElement(element:Element) extends RunnerMessage
+case class ElementUpdated(newElement:Element) extends RunnerMessage
+case class WorldUpdated(elements:List[Element]) extends RunnerMessage
 
 /**
  * Worker class - actor to calculate elements
@@ -39,7 +39,7 @@ class Worker extends Actor {
 class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
   val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
   var numberOfResults:Int = _
-  var newElements:mutable.MutableList[LifeGameElement] = mutable.MutableList()
+  var newElements:mutable.MutableList[Element] = mutable.MutableList()
   var operator:ActorRef = null
 
   def receive = {
@@ -111,17 +111,10 @@ class CalculatingOperator(val workers: Int) extends Actor {
 
 object LifeActors {
   val workers = 100
-  val lifeRatio = 0.6
-
   val system = ActorSystem("life-model-calculations")
   val operator = system.actorOf(Props(new CalculatingOperator(workers)), name = "listener")
 
-  def run (width:Integer, height:Integer, iterations:Int) {
-
-    val world: LifeGameWorldModel = LifeGameWorldGenerator.generate(width, height)
-    LifeGenerator.applyLife(lifeRatio, world)
-    println("Started with world:\n" + world.printer.toAsciiSquare(world))
-
+  def run (width:Integer, height:Integer, world:WorldModel, iterations:Int) {
     operator ! InitWorld(world, iterations)
   }
 

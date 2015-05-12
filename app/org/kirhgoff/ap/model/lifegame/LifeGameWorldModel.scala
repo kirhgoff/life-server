@@ -64,10 +64,6 @@ class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
   }
 
 
-  override def mergeChanges(): Unit = {}
-
-  override def process(being: Element): Unit = {}
-
   override def setElements(elements: List[Element]) {
     //println (s"setElements: $elements")
     elements match {
@@ -78,4 +74,7 @@ class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
 
   def getElements:List[LifeGameElement] = elements
 
+  override def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]): Unit = {}
+  override def mergeChanges(): Unit = {}
+  override def process(being: Element): Unit = {}
 }

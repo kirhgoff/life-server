@@ -2,6 +2,8 @@ package controllers
 
 import akka.LifeActors
 import models.StartCommand._
+import org.kirhgoff.ap.core.WorldModel
+import org.kirhgoff.ap.model.lifegame.{LifeGameWorldGenerator, LifeGenerator}
 import play.api.libs.EventSource
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.{Concurrent, Enumeratee}
@@ -14,6 +16,8 @@ object Application extends Controller {
 
   val DefaultSize = 10
   val DefaultIterations = 100
+
+  val LifeRatio = 0.6
 
   val (lifeOut, lifeChannel) = Concurrent.broadcast[JsValue]
   
@@ -32,7 +36,10 @@ object Application extends Controller {
         BadRequest(s"More than $MaxIterations are not allowed")
       }
       case StartCommand(width, height, iterationsOption) => {
-        LifeActors.run(width, height, iterationsOption match {
+        val world: WorldModel = LifeGameWorldGenerator.generate(width, height, LifeRatio)
+        println("Started with world:\n" + world.printer.toAsciiSquare(world))
+
+        LifeActors.run(width, height, world, iterationsOption match {
           case None => DefaultIterations
           case Some(iterations) => iterations
         })
