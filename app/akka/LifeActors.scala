@@ -72,15 +72,15 @@ class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
 class CalculatingOperator(val workers: Int) extends Actor {
   var iterations:Int = 0
   var currentIteration:Int = 0
-  var worldPrinter:WorldPrinter = new WorldPrinter ('*', ' ')
   var world:LifeGameWorldModel = null
   val master = LifeActors.system.actorOf(Props(new AggregatingMaster(workers)), name = "master")
 
   def receive = {
     case WorldUpdated(elements) ⇒ {
       //println ("operator.WorldUpdated")
+      val worldPrinter:WorldPrinter = world.printer
       world.setElements(elements)
-      val stringWorld: String = worldPrinter.print(world)
+      val stringWorld: String = worldPrinter.toAsciiSquare(world)
       //println(s"-------------\n$stringWorld")
       Application.lifeChannel.push(Json.toJson(World(stringWorld)))
 
@@ -97,10 +97,12 @@ class CalculatingOperator(val workers: Int) extends Actor {
     case InitWorld(world:LifeGameWorldModel, iterations:Int) => {
       //println ("operator.InitWord")
       this.world = world
+      val worldPrinter:WorldPrinter = world.printer
+
       this.iterations = iterations
       this.currentIteration = 0
 
-      Application.lifeChannel.push(Json.toJson(World(worldPrinter.print(world))))
+      Application.lifeChannel.push(Json.toJson(World(worldPrinter.toAsciiSquare(world))))
       master ! CalculateNewState(world.getElements)
     }
   }
@@ -116,9 +118,9 @@ object LifeActors {
 
   def run (width:Integer, height:Integer, iterations:Int) {
 
-    val world: LifeGameWorldModel = WorldGenerator.generate(width, height)
+    val world: LifeGameWorldModel = LifeGameWorldGenerator.generate(width, height)
     LifeGenerator.applyLife(lifeRatio, world)
-    println("Started with world:\n" + new WorldPrinter ('0', '-').print(world))
+    println("Started with world:\n" + world.printer.toAsciiSquare(world))
 
     operator ! InitWorld(world, iterations)
   }

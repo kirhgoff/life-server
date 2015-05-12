@@ -1,8 +1,14 @@
 package org.kirhgoff.ap.model.lifegame
 
-case class WorldDimension (surroundings:Array[Boolean])
+import org.kirhgoff.ap.core.{Element, Environment, WorldModel}
 
-class LifeGameWorldModel(val width:Int, val height:Int) {
+case class WorldDimension (surroundings:Array[Boolean]) extends Environment
+
+class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
+  val worldPrinter = new LifeGameWorldPrinter ('0', '-')
+
+  def printer = worldPrinter
+
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
 
   var elements:List[LifeGameElement] = List()
@@ -15,12 +21,15 @@ class LifeGameWorldModel(val width:Int, val height:Int) {
    * -3X4-
    * -567-
    * -----
-   *
-   * @param x
-   * @param y
-   * @return
    */
-  def giveEnvironmentFor(x: Int, y: Int):WorldDimension = {
+  override def getEnvironmentFor(element: Element):Environment = {
+    val e:LifeGameElement = element match {
+      case x:LifeGameElement => x
+      case _ => throw new IllegalArgumentException("Incorrect element type")
+    }
+    val x = e.x
+    val y = e.y
+
     val result = new Array[Boolean] (8)
     result(0) = elements(indexFor(x-1, y-1)).isAlive
     result(1) = elements(indexFor(x,   y-1)).isAlive
@@ -36,14 +45,7 @@ class LifeGameWorldModel(val width:Int, val height:Int) {
     WorldDimension(result)
   }
 
-
-  def setElements(elements: List[LifeGameElement]) = {
-    //println (s"setElements: $elements")
-    this.elements = elements
-  }
-
-  def getElements:List[LifeGameElement] = elements
-
+  //Move to trait
   def indexFor(x:Int, y:Int) = {
     var newX  = x
     var newY = y
@@ -60,4 +62,20 @@ class LifeGameWorldModel(val width:Int, val height:Int) {
 
     newX + newY * width
   }
+
+
+  override def mergeChanges(): Unit = {}
+
+  override def process(being: Element): Unit = {}
+
+  override def setElements(elements: List[Element]) {
+    //println (s"setElements: $elements")
+    elements match {
+      case elems:List[LifeGameElement] => this.elements = elems
+      case _ => throw new IllegalArgumentException("Incorrect elements type")
+    }
+  }
+
+  def getElements:List[LifeGameElement] = elements
+
 }

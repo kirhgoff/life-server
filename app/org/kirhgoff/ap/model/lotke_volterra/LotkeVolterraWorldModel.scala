@@ -37,4 +37,9 @@ object LotkeVolterraWorldModel {
   val InitialPredatorEnergy = 10
   val PreyMaturityAge = 2
   val PredatorMaturityAge = 2
+
+  def main (args: Array[String]) {
+    println("Starting Lotke-Volterra...")
+
+  }
 }

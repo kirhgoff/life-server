@@ -1,20 +1,27 @@
 package org.kirhgoff.ap.model.lifegame
 
-class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) {
+import org.kirhgoff.ap.core._
+
+class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) extends Element{
   var alive:Boolean = false
 
   def setAlive(alive: Boolean) = {this.alive = alive}
   def isAlive = alive
 
-  def calculateNewState(value:WorldDimension):LifeGameElement = {
-    val newState = new LifeGameElement (x, y, world)
-    newState.setAlive(LifeGameElement.shouldBeAlive(alive, value))
-    //println(s"$this newState=$newState sum=${Element.sum(value)}")
-    newState
+  def calculateNewState(value:Environment):LifeGameElement = {
+    value match {
+      case value:WorldDimension => {
+        val newState = new LifeGameElement (x, y, world)
+        newState.setAlive(LifeGameElement.shouldBeAlive(alive, value))
+        //println(s"$this newState=$newState sum=${Element.sum(value)}")
+        newState
+      }
+      case _ => throw new IllegalArgumentException("Incorrect environment type")
+    }
   }
 
   def calculateNewState():LifeGameElement = {
-    calculateNewState(world.giveEnvironmentFor(x, y))
+    calculateNewState(world.getEnvironmentFor(this))
   }
 
   override def toString = s"E[$x, $y, ${if (alive) '0' else '-'}]"
@@ -26,6 +33,20 @@ class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) {
   }
 
   override def hashCode : Int = 41*(41*(41+x)+y) + LifeGameElement.toInt(isAlive)
+
+  //Default overrides
+  override def liveFurther(element: Element, position: Position): Element = this
+  override def canFeed: Boolean = true
+  override def position: Position = new Position(){}
+  override def dieStrategy: Strategy = ZeroStrategy(this)
+  override def breedStrategy: Strategy = ZeroStrategy(this)
+  override def feedStrategy: Strategy = ZeroStrategy(this)
+  override def moveStrategy: Strategy = ZeroStrategy(this)
+  override def canBreed: Boolean = true
+  override def shouldDie: Boolean = false
+  override def canMove: Boolean = false
+
+
 }
 
 object LifeGameElement {

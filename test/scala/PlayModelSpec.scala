@@ -4,7 +4,7 @@ import models.StartCommand.StartCommand
 import org.specs2.mutable.Specification
 import play.api.libs.json.Json
 
-class ModelSpec extends Specification {
+class PlayModelSpec extends Specification {
 
   "Model should be able to" should {
     "read/write as Json" in {
