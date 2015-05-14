@@ -3,7 +3,7 @@ package controllers
 import akka.LifeActors
 import models.StartCommand._
 import org.kirhgoff.ap.core.WorldModel
-import org.kirhgoff.ap.model.lifegame.{LifeGameWorldGenerator, LifeGenerator}
+import org.kirhgoff.ap.model.lifegame.{LifeGameWorldGenerator}
 import play.api.libs.EventSource
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.{Concurrent, Enumeratee}

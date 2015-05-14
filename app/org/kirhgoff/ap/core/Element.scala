@@ -5,6 +5,8 @@ trait Element {
 
   def isAlive: Boolean
 
+  def setAlive(alive:Boolean)
+
   def dieStrategy: Strategy
 
   def position: Position

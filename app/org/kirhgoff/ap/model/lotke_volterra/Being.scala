@@ -15,7 +15,7 @@ class Being(currentEnergy: Int, maturityAge: Int, moveStrategy: Strategy, feedSt
 
   override def position: Position = ???
 
-  override def dieStrategy: Strategy = this.dieStrategy
+  override def dieStrategy: Strategy = ???
 
   override def canMove: Boolean = ???
 

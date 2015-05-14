@@ -11,7 +11,7 @@ class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
 
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
 
-  var elements:List[LifeGameElement] = List()
+  var elements:List[Element] = List()
 
   /**
    *
@@ -66,13 +66,10 @@ class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
 
   override def setElements(elements: List[Element]) {
     //println (s"setElements: $elements")
-    elements match {
-      case elems:List[LifeGameElement] => this.elements = elems
-      case _ => throw new IllegalArgumentException("Incorrect elements type")
-    }
+    this.elements = elements
   }
 
-  def getElements:List[LifeGameElement] = elements
+  def getElements:List[Element] = elements
 
   override def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]): Unit = {}
   override def mergeChanges(): Unit = {}

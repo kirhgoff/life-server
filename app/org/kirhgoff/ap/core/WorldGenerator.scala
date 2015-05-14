@@ -1,7 +1,5 @@
 package org.kirhgoff.ap.core
 
-import org.kirhgoff.ap.model.lifegame.LifeGenerator
-
 
 abstract class WorldGenerator {
 
@@ -14,7 +12,7 @@ abstract class WorldGenerator {
 
     val elements = elementsSeq.toList
     world.setElements (elements)
-    LifeGenerator.applyLife(lifeRatio, world)
+    applyLife(lifeRatio, world)
     //println(s"WG: Generated elements ${elements.mkString(",")}")
     world
   }
