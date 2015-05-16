@@ -8,7 +8,7 @@ class LifeGameElement(val x:Int, val y:Int, val alive:Boolean, world:LifeGameWor
 
   def calculateNewState(value:Environment):LifeGameElement = {
     value match {
-      case value:WorldDimension => {
+      case value:CloseSurroundings => {
         val newState = new LifeGameElement (x, y, LifeGameElement.shouldBeAlive(alive, value), world)
         //println(s"$this newState=$newState sum=${Element.sum(value)}")
         newState
@@ -32,13 +32,13 @@ class LifeGameElement(val x:Int, val y:Int, val alive:Boolean, world:LifeGameWor
   override def hashCode : Int = 41*(41*(41+x)+y) + LifeGameElement.toInt(isAlive)
 
   //TODO create real strategy
-  override def getStrategy(environment: Environment): Strategy = ZeroStrategy(this)
+  override def getStrategy(environment: Environment): Strategy = DoNothingStrategy(this)
 }
 
 object LifeGameElement {
   def toInt(b: Boolean) = if(b) 1 else 0
-  def sum(value:WorldDimension) = value.surroundings.foldLeft(0)(_ + LifeGameElement.toInt(_))
-  def shouldBeAlive(alive:Boolean, value:WorldDimension) = {
+  def sum(value:CloseSurroundings) = value.surroundings.foldLeft(0)(_ + LifeGameElement.toInt(_))
+  def shouldBeAlive(alive:Boolean, value:CloseSurroundings) = {
     val summa = sum(value)
     (alive && (summa == 2 || summa == 3)) || (!alive && summa == 3)
   }

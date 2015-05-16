@@ -1,77 +1,60 @@
 package org.kirhgoff.ap.model.lifegame
 
-import org.kirhgoff.ap.core.{Element, Environment, WorldModel}
+import java.awt.Graphics
 
-case class WorldDimension (surroundings:Array[Boolean]) extends Environment
+import org.kirhgoff.ap.core._
 
-class LifeGameWorldModel(val width:Int, val height:Int) extends WorldModel {
-  val worldPrinter = new LifeGameWorldPrinter ('0', '-')
+import scala.util.Random
 
-  def printer = worldPrinter
+//-------------------------------
+// Model
+//---------------------------------
 
-  def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
-
-  var elements:List[Element] = List()
-
-  /**
-   *
-   * Indices of surrounding cells
-   * -----
-   * -012-
-   * -3X4-
-   * -567-
-   * -----
-   */
-  override def getEnvironmentFor(element: Element):Environment = {
-    val e:LifeGameElement = element match {
-      case x:LifeGameElement => x
-      case _ => throw new IllegalArgumentException("Incorrect element type")
-    }
-    val x = e.x
-    val y = e.y
-
-    val result = new Array[Boolean] (8)
-    result(0) = elements(indexFor(x-1, y-1)).isAlive
-    result(1) = elements(indexFor(x,   y-1)).isAlive
-    result(2) = elements(indexFor(x+1, y-1)).isAlive
-
-    result(3) = elements(indexFor(x-1, y)).isAlive
-    result(4) = elements(indexFor(x+1, y)).isAlive
-
-    result(5) = elements(indexFor(x-1, y+1)).isAlive
-    result(6) = elements(indexFor(x,   y+1)).isAlive
-    result(7) = elements(indexFor(x+1, y+1)).isAlive
-
-    WorldDimension(result)
-  }
-
-  //Move to trait
-  def indexFor(x:Int, y:Int) = {
-    var newX  = x
-    var newY = y
-    if (x < 0) {
-      newX = width + x
-    } else if (x >= width) {
-      newX = x % width
-    }
-    if (y < 0) {
-      newY = height + y
-    } else if (y >= height) {
-      newY = y % height
-    }
-
-    newX + newY * width
-  }
-
-
-  override def setElements(elements: List[Element]) {
-    //println (s"setElements: $elements")
-    this.elements = elements
-  }
-
-  def getElements:List[Element] = elements
+class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
+  val printer = new LifeGameWorldPrinter ('0', '-')
 
   override def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]): Unit = {}
   override def mergeChanges(): Unit = {}
   override def process(being: Element): Unit = {}
+}
+
+//-------------------------------
+// Generator
+//---------------------------------
+
+class LifeGameWorldGenerator(val percentOfLife:Double) extends WorldGenerator {
+
+  val random = new Random
+
+  def createWorld(width: Int, height: Int): WorldModel = {
+    new LifeGameWorldModel(width, height)
+  }
+
+  def generateElement(x:Int, y:Int, world:WorldModel):Element = {
+    world match {
+      case w:LifeGameWorldModel => new LifeGameElement(x, y, random.nextDouble > percentOfLife, w)
+      case _ => throw new IllegalArgumentException("Incorrect world model class")
+    }
+  }
+}
+
+//-------------------------------
+// Printer
+//---------------------------------
+class LifeGameWorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) extends WorldPrinter {
+  def renderElement(g:Graphics, element:Element, cellWidth:Double, cellHeight:Double) = {
+    element match {
+      case e: LifeGameElement =>  if (element.isAlive) g.fillRect((e.x*cellWidth).toInt, (e.y*cellHeight).toInt, cellWidth.toInt, cellHeight.toInt)
+      case _ => throw new IllegalArgumentException("Incorrect element class")
+    }
+  }
+
+  def renderElement(element:Element, asci: Array[Array[Char]]) = {
+    asci(element.y)(element.x) = element match {
+      case e: LifeGameElement if e.isAlive => aliveSymbol
+      case e: LifeGameElement if !e.isAlive => deadSymbol
+      case _ => throw new IllegalArgumentException("Incorrect element class")
+    }
+  }
+
 }

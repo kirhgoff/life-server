@@ -10,7 +10,7 @@ trait Element {
 }
 
 class EmptyElement(val x:Int, val y:Int) extends Element {
-  override def getStrategy(environment: Environment): Strategy = ZeroStrategy(this)
+  override def getStrategy(environment: Environment): Strategy = DoNothingStrategy(this)
   override def isAlive: Boolean = false
 }
 

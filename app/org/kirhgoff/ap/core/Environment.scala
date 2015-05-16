@@ -4,3 +4,7 @@ package org.kirhgoff.ap.core
 trait Environment {
 
 }
+
+case class CloseSurroundings (surroundings:Array[Boolean]) extends Environment
+
+

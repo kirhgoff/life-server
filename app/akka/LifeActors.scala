@@ -1,5 +1,7 @@
 package akka
 
+import java.util.ConcurrentModificationException
+
 import org.kirhgoff.ap.model.lifegame._
 import play.api.libs.json._
 import akka.actor._
@@ -13,21 +15,27 @@ import org.kirhgoff.ap.core._
 
 sealed trait RunnerMessage
 
-case class InitWorld(world:WorldModel, iterations:Int) extends RunnerMessage
-case class CalculateNewState(elements:List[Element]) extends RunnerMessage
-case class ProcessElement(element:Element) extends RunnerMessage
-case class ElementUpdated(newElement:Element) extends RunnerMessage
+case class StartWorldProcessing(world:WorldModel, iterations:Int) extends RunnerMessage
+case class CalculateNewState(world:WorldModel) extends RunnerMessage
+case class ProcessElement(element:Element, environment:Environment) extends RunnerMessage
+case class ElementUpdated(newState:Element, created:List[Element], removed:List[Element]) extends RunnerMessage
 case class WorldUpdated(elements:List[Element]) extends RunnerMessage
+//TODO updated
 
 /**
  * Worker class - actor to calculate elements
  */
-class Worker extends Actor {
+class ElementProcessorActor extends Actor {
   def receive = {
-    case ProcessElement(element:LifeGameElement) ⇒ {
-      val newState = element.calculateNewState()
+    case ProcessElement(element:Element, environment:Environment) ⇒ {
+      val strategy:Strategy = element.getStrategy(environment)
+      strategy.apply(element, environment)
       //println("Worker:" + element + "->" + newState)
-      sender ! ElementUpdated(newState)
+      sender ! ElementUpdated(
+        strategy.getNewState,
+        strategy.getCreatedElements,
+        strategy.getRemovedElements
+      )
     }
   }
 }
@@ -36,31 +44,36 @@ class Worker extends Actor {
  * Master - splits a task to calculate world into separate tasks
  * @param nrOfWorkers - how many workers to use
  */
-class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
-  val workerRouter = context.actorOf(Props[Worker].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
+class ElementBatchProcessorActor(nrOfWorkers: Int)  extends Actor {
+  val workerRouter = context.actorOf(Props[ElementProcessorActor].withRouter(RoundRobinPool(nrOfWorkers)), name = "workerRouter")
   var numberOfResults:Int = _
-  var newElements:mutable.MutableList[Element] = mutable.MutableList()
+//  var newElements:mutable.MutableList[Element] = mutable.MutableList()
   var operator:ActorRef = null
+  var worldMerger:WorldModelMerger = null
 
   def receive = {
     //Make sure we are in correct state
-    case CalculateNewState(_) if numberOfResults != 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 0")
-    case ElementUpdated(_) if numberOfResults == 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 1")
+    case CalculateNewState if numberOfResults != 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 0")
+    case ElementUpdated if numberOfResults == 0 => throw new RuntimeException("Incorrect sequence of calls, check the code 1")
 
-    //The logic itself
-    case CalculateNewState(elements) => {
+    case CalculateNewState(world) => {
       //println("CalculateNewState")
-      numberOfResults = elements.length
       operator = sender
-      elements.map(workerRouter ! ProcessElement(_))
+
+      worldMerger = new WorldModelMerger(world.width, world.height, world.getElements)
+      val elements:List[Element] = world.getElements.filter(!_.isInstanceOf[EmptyElement])
+
+      numberOfResults = elements.length
+      elements.map {
+        e:Element => workerRouter ! ProcessElement(e, world.getEnvironmentFor(e))
+      }
     }
-    case ElementUpdated(newElement) => {
+    case ElementUpdated(newState, created, deleted) => {
       //println ("Result received:" + newElement)
-      newElements += newElement
+      worldMerger.merge(newState, created, deleted)
       numberOfResults -= 1
       if (numberOfResults == 0) {
-        operator ! WorldUpdated(newElements.toList)
-        newElements = mutable.MutableList()        
+        operator ! WorldUpdated(worldMerger.getResults)
       }
     }
   }
@@ -69,11 +82,11 @@ class AggregatingMaster(nrOfWorkers: Int)  extends Actor {
 /**
  * Created with a world to run and runs it
  */
-class CalculatingOperator(val workers: Int) extends Actor {
+class PlayWorldRunnerActor(val workers: Int) extends Actor {
   var iterations:Int = 0
   var currentIteration:Int = 0
   var world:LifeGameWorldModel = null
-  val master = LifeActors.system.actorOf(Props(new AggregatingMaster(workers)), name = "master")
+  val master = LifeActors.system.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
 
   def receive = {
     case WorldUpdated(elements) ⇒ {
@@ -91,20 +104,29 @@ class CalculatingOperator(val workers: Int) extends Actor {
         currentIteration = 0
       } else {
         Thread.sleep(100)
-        sender ! CalculateNewState(elements)
+        sender ! CalculateNewState(world)
       }
     }
-    case InitWorld(world:LifeGameWorldModel, iterations:Int) => {
+    case StartWorldProcessing(world:LifeGameWorldModel, iterations:Int) => {
       //println ("operator.InitWord")
+      if (alreadyRunning) throw new ConcurrentModificationException("Should not happen")
       this.world = world
-      val worldPrinter:WorldPrinter = world.printer
 
       this.iterations = iterations
       this.currentIteration = 0
 
-      Application.lifeChannel.push(Json.toJson(World(worldPrinter.toAsciiSquare(world))))
-      master ! CalculateNewState(world.getElements)
+      val worldPrinter:WorldPrinter = world.printer
+
+      //TODO run standalone
+      val json: JsValue = Json.toJson(World(worldPrinter.toAsciiSquare(world)))
+      Application.lifeChannel.push(json)
+
+      master ! CalculateNewState(world)
     }
+  }
+
+  def alreadyRunning: Boolean = {
+    this.iterations != 0 || this.currentIteration != null
   }
 }
 
@@ -112,10 +134,10 @@ class CalculatingOperator(val workers: Int) extends Actor {
 object LifeActors {
   val workers = 100
   val system = ActorSystem("life-model-calculations")
-  val operator = system.actorOf(Props(new CalculatingOperator(workers)), name = "listener")
+  val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
 
   def run (world:WorldModel, iterations:Int) {
-    operator ! InitWorld(world, iterations)
+    operator ! StartWorldProcessing(world, iterations)
   }
 
   def stop = {} //TODO
