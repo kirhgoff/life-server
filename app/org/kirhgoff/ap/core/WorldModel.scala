@@ -3,8 +3,8 @@ package org.kirhgoff.ap.core
 trait WorldModel {
 
   //TODO create separate class WorldGeometry?
-  def height: Int
-  def width: Int
+  def getHeight: Int
+  def getWidth: Int
 
   def getEnvironmentFor(element: Element): Environment
   def getElements:List[Element]

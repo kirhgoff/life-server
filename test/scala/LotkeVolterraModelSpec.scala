@@ -1,15 +1,16 @@
 package scala
 
 import org.kirhgoff.ap.model.lifegame.LifeGameWorldGenerator
+import org.kirhgoff.ap.model.lotke_volterra.LotkaVolterraWorldGenerator
 import org.specs2.mutable.Specification
 
 
 class LotkeVolterraModelSpec extends Specification {
     //def actorRefFactory = system
 
-    "WorldGenerator" should {
+    "LotkaVolterraWorldGenerator" should {
       "generate one-cell world" in {
-        val world = LifeGameWorldGenerator.generate(1, 1)
+        val world = LotkaVolterraWorldGenerator.generate(1, 1, 0d, 0d)
         world.getElements shouldNotEqual null
         world.getElements.length shouldEqual 1
         world.getElements(0) shouldNotEqual null

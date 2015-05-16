@@ -14,8 +14,9 @@ class LifeGameWorldPrinter(val aliveSymbol:Char, val deadSymbol:Char) extends Wo
   }
 
   def renderElement(element:Element, asci: Array[Array[Char]]) = {
-    element match {
-      case e: LifeGameElement =>  asci(e.y)(e.x) = if (e.isAlive) aliveSymbol else deadSymbol
+    asci(element.y)(element.x) = element match {
+      case e: LifeGameElement if e.isAlive => aliveSymbol
+      case e: LifeGameElement if !e.isAlive => deadSymbol
       case _ => throw new IllegalArgumentException("Incorrect element class")
     }
   }

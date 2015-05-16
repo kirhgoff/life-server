@@ -1,32 +1,22 @@
 package org.kirhgoff.ap.model.lotke_volterra
 
-import org.kirhgoff.ap.core.{Position, Element, Strategy}
+import org.kirhgoff.ap.core.{Element, Environment, Strategy}
 
-class Being(currentEnergy: Int, maturityAge: Int, moveStrategy: Strategy, feedStrategy: Strategy, breedStrategy: Strategy, dieStrategy:Strategy) extends Element {
+sealed trait Kind
+case object Prey extends Kind
+case object Hunter extends Kind
+
+class Being(val kind:Kind, val x:Int, val y:Int, val maturityAge:Int, initialEnergy:Int) extends Element {
+  var currentEnergy: Int = initialEnergy
   var age: Int = 0
+  val strategy: Strategy = kind match {
+    case Prey => new PreyStrategy()
+    case Hunter => new HunterStrategy()
+  }
 
-  def shouldDie = currentEnergy <= 0
 
-  def canReproduce = age >= maturityAge
+  override def isAlive: Boolean = currentEnergy > 0
 
-  override def liveFurther(element: Element, position: Position): Element = ???
-
-  override def canFeed: Boolean = ???
-
-  override def position: Position = ???
-
-  override def dieStrategy: Strategy = ???
-
-  override def canMove: Boolean = ???
-
-  override def breedStrategy: Strategy = ???
-
-  override def isAlive: Boolean = ???
-
-  override def feedStrategy: Strategy = ???
-
-  override def moveStrategy: Strategy = ???
-
-  override def canBreed: Boolean = ???
+  override def getStrategy(environment: Environment): Strategy = strategy
 }
 

@@ -2,17 +2,14 @@ package org.kirhgoff.ap.model.lifegame
 
 import org.kirhgoff.ap.core._
 
-class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) extends Element{
-  var alive:Boolean = false
 
-  def setAlive(alive: Boolean) = {this.alive = alive}
+class LifeGameElement(val x:Int, val y:Int, val alive:Boolean, world:LifeGameWorldModel) extends Element{
   def isAlive = alive
 
   def calculateNewState(value:Environment):LifeGameElement = {
     value match {
       case value:WorldDimension => {
-        val newState = new LifeGameElement (x, y, world)
-        newState.setAlive(LifeGameElement.shouldBeAlive(alive, value))
+        val newState = new LifeGameElement (x, y, LifeGameElement.shouldBeAlive(alive, value), world)
         //println(s"$this newState=$newState sum=${Element.sum(value)}")
         newState
       }
@@ -34,19 +31,8 @@ class LifeGameElement(val x:Int, val y:Int, world:LifeGameWorldModel) extends El
 
   override def hashCode : Int = 41*(41*(41+x)+y) + LifeGameElement.toInt(isAlive)
 
-  //Default overrides
-  override def liveFurther(element: Element, position: Position): Element = this
-  override def canFeed: Boolean = true
-  override def position: Position = new Position(){}
-  override def dieStrategy: Strategy = ZeroStrategy(this)
-  override def breedStrategy: Strategy = ZeroStrategy(this)
-  override def feedStrategy: Strategy = ZeroStrategy(this)
-  override def moveStrategy: Strategy = ZeroStrategy(this)
-  override def canBreed: Boolean = true
-  override def shouldDie: Boolean = false
-  override def canMove: Boolean = false
-
-
+  //TODO create real strategy
+  override def getStrategy(environment: Environment): Strategy = ZeroStrategy(this)
 }
 
 object LifeGameElement {

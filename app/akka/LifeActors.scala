@@ -114,7 +114,7 @@ object LifeActors {
   val system = ActorSystem("life-model-calculations")
   val operator = system.actorOf(Props(new CalculatingOperator(workers)), name = "listener")
 
-  def run (width:Integer, height:Integer, world:WorldModel, iterations:Int) {
+  def run (world:WorldModel, iterations:Int) {
     operator ! InitWorld(world, iterations)
   }
 

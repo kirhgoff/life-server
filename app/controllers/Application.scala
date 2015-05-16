@@ -36,10 +36,10 @@ object Application extends Controller {
         BadRequest(s"More than $MaxIterations are not allowed")
       }
       case StartCommand(width, height, iterationsOption) => {
-        val world: WorldModel = LifeGameWorldGenerator.generate(width, height, LifeRatio)
+        val world: WorldModel = new LifeGameWorldGenerator(LifeRatio).generate(width, height)
         println("Started with world:\n" + world.printer.toAsciiSquare(world))
 
-        LifeActors.run(width, height, world, iterationsOption match {
+        LifeActors.run(world, iterationsOption match {
           case None => DefaultIterations
           case Some(iterations) => iterations
         })

@@ -1,28 +1,18 @@
 package org.kirhgoff.ap.core
 
 trait Element {
-  def liveFurther(element: Element, position: Position):Element
+  //TODO remove from element
+  def x:Int
+  def y:Int
 
+  def getStrategy(environment: Environment): Strategy
   def isAlive: Boolean
-
-  def setAlive(alive:Boolean)
-
-  def dieStrategy: Strategy
-
-  def position: Position
-
-  def moveStrategy:Strategy
-
-  def breedStrategy:Strategy
-
-  def feedStrategy:Strategy
-
-  def shouldDie: Boolean
-
-  def canMove: Boolean
-
-  def canFeed: Boolean
-
-  def canBreed: Boolean
-
 }
+
+class EmptyElement(val x:Int, val y:Int) extends Element {
+  override def getStrategy(environment: Environment): Strategy = ZeroStrategy(this)
+  override def isAlive: Boolean = false
+}
+
+
+

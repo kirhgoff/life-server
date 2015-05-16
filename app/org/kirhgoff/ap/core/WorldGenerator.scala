@@ -3,7 +3,7 @@ package org.kirhgoff.ap.core
 
 abstract class WorldGenerator {
 
-  def generate(width:Int, height:Int, lifeRatio:Double):WorldModel = {
+  def generate(width:Int, height:Int):WorldModel = {
     val world = createWorld(width, height)
     val elementsSeq = for {
       y <- 0 until height
@@ -12,7 +12,6 @@ abstract class WorldGenerator {
 
     val elements = elementsSeq.toList
     world.setElements (elements)
-    applyLife(lifeRatio, world)
     //println(s"WG: Generated elements ${elements.mkString(",")}")
     world
   }

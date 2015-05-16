@@ -3,17 +3,15 @@ package org.kirhgoff.ap.core
 trait Strategy {
   def apply(value: Element, environment: Environment):Unit
 
-  def createdElements: List[Element]
-  def removedElements: List[Element]
-  def newPosition: Position
-  def newState:Element
+  def getCreatedElements: List[Element]
+  def getRemovedElements: List[Element]
+  def getNewState:Element
 }
 
 class ZeroStrategy(var being:Element) extends Strategy {
-  override def newPosition: Position = being.position
-  override def newState: Element = being
-  override def createdElements: List[Element] = List.empty
-  override def removedElements: List[Element] = List.empty
+  override def getNewState: Element = being
+  override def getCreatedElements: List[Element] = List.empty
+  override def getRemovedElements: List[Element] = List.empty
   override def apply(being: Element, environment: Environment) {}
 }
 
