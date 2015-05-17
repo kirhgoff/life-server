@@ -12,38 +12,10 @@ import scala.util.Random
 // Model
 //---------------------------------
 
-class LotkeVolterraWorldModel(val width:Int, val height:Int) extends WorldModel {
-
-  def process(being:Element) = {
-    val environment:Environment = getEnvironmentFor(being)
-    val strategy:Strategy = being.getStrategy (environment)
-
-    strategy.apply(being, environment)
-    val elementsToCreate:List[Element] = strategy.getCreatedElements
-    val elementsToRemove:List[Element] = strategy.getRemovedElements
-    val newState = strategy.getNewState
-
-    //Merging is important
-    // Will predator kill newborn prey? Or opposite?
-    // Will moved prey kill newborn prey
-    // do we see aging as new prey killing younger prey (age + 1)?
-    //WTF? being.liveFurther(newState, newPosition)
-    if (newState.isAlive) collectChanges(newState :: elementsToCreate, elementsToRemove)
-    else  collectChanges(elementsToCreate, being :: elementsToRemove)
-  }
-
-  override def mergeChanges(): Unit = ???
-
-  override def getElements: List[Element] = ???
-
-  override def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]): Unit = ???
-
-  override def getEnvironmentFor(element: Element): Environment = ???
-
-  override def setElements(elements: List[Element]): Unit = ???
-
-
-  override def printer: WorldPrinter = ???
+class LotkeVolterraWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
+  //TODO optimize
+  override def printer: WorldPrinter = new LotkeVolterraWorldPrinter('p', 'H', ' ')
+  override def  merger = new WorldModel2DMerger(width, height)
 }
 
 //-------------------------------

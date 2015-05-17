@@ -2,13 +2,22 @@ package controllers
 
 import akka.LifeActors
 import models.StartCommand._
-import org.kirhgoff.ap.core.WorldModel
+import models.World
+import org.kirhgoff.ap.core.{WorldPrinter, WorldModelListener, WorldModel}
 import org.kirhgoff.ap.model.lifegame.{LifeGameWorldGenerator}
 import play.api.libs.EventSource
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.{Concurrent, Enumeratee}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{Json, JsValue}
 import play.api.mvc._
+
+object PlayWorldModelListener extends WorldModelListener {
+  override def worldUpdated(world: WorldModel): Unit = {
+    val worldPrinter:WorldPrinter = world.printer
+    val json: JsValue = Json.toJson(World(worldPrinter.toAsciiSquare(world)))
+    Application.lifeChannel.push(json)
+  }
+}
 
 object Application extends Controller {
   val MaxSize = 50
@@ -39,7 +48,7 @@ object Application extends Controller {
         val world: WorldModel = new LifeGameWorldGenerator(LifeRatio).generate(width, height)
         println("Started with world:\n" + world.printer.toAsciiSquare(world))
 
-        LifeActors.run(world, iterationsOption match {
+        LifeActors.run(world, PlayWorldModelListener, iterationsOption match {
           case None => DefaultIterations
           case Some(iterations) => iterations
         })

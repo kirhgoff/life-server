@@ -24,7 +24,7 @@ class LifeGameElement(val x:Int, val y:Int, val alive:Boolean, world:LifeGameWor
   override def toString = s"E[$x, $y, ${if (alive) '0' else '-'}]"
 
   override def equals(other:Any):Boolean = other match {
-    //TODO compare worldss
+    //TODO compare worlds
     case that : LifeGameElement => other.isInstanceOf[LifeGameElement] && x == that.x && y == that.y && isAlive == that.isAlive
     case _ => false
   }

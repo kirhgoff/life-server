@@ -12,10 +12,7 @@ import scala.util.Random
 
 class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
   val printer = new LifeGameWorldPrinter ('0', '-')
-
-  override def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]): Unit = {}
-  override def mergeChanges(): Unit = {}
-  override def process(being: Element): Unit = {}
+  override def makeMerger: WorldModel2DMerger = new WorldModel2DMerger(width, height, getElements)
 }
 
 //-------------------------------

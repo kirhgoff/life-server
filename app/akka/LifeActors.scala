@@ -2,20 +2,16 @@ package akka
 
 import java.util.ConcurrentModificationException
 
-import org.kirhgoff.ap.model.lifegame._
-import play.api.libs.json._
 import akka.actor._
-import akka.routing.{RoundRobinPool, RoundRobinRouter}
-
-import scala.collection.mutable
+import akka.routing.RoundRobinPool
 import controllers.Application
 import models.World
-
 import org.kirhgoff.ap.core._
+import play.api.libs.json._
 
 sealed trait RunnerMessage
 
-case class StartWorldProcessing(world:WorldModel, iterations:Int) extends RunnerMessage
+case class StartWorldProcessing(world:WorldModel, listener:WorldModelListener, iterations:Int) extends RunnerMessage
 case class CalculateNewState(world:WorldModel) extends RunnerMessage
 case class ProcessElement(element:Element, environment:Environment) extends RunnerMessage
 case class ElementUpdated(newState:Element, created:List[Element], removed:List[Element]) extends RunnerMessage
@@ -59,8 +55,8 @@ class ElementBatchProcessorActor(nrOfWorkers: Int)  extends Actor {
     case CalculateNewState(world) => {
       //println("CalculateNewState")
       operator = sender
+      worldMerger = world.makeMerger
 
-      worldMerger = new WorldModelMerger(world.width, world.height, world.getElements)
       val elements:List[Element] = world.getElements.filter(!_.isInstanceOf[EmptyElement])
 
       numberOfResults = elements.length
@@ -85,43 +81,40 @@ class ElementBatchProcessorActor(nrOfWorkers: Int)  extends Actor {
 class PlayWorldRunnerActor(val workers: Int) extends Actor {
   var iterations:Int = 0
   var currentIteration:Int = 0
-  var world:LifeGameWorldModel = null
+  var world:WorldModel = null
+  var listener:WorldModelListener = null
+
   val master = LifeActors.system.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
 
   def receive = {
+    case StartWorldProcessing(world:WorldModel, listener:WorldModelListener, iterations:Int) => {
+      //println ("operator.InitWord")
+      if (alreadyRunning) throw new ConcurrentModificationException("Should not happen")
+      this.world = world
+      this.listener = listener
+      this.iterations = iterations
+      this.currentIteration = 0
+
+      listener.worldUpdated(world)
+
+      master ! CalculateNewState(world)
+    }
     case WorldUpdated(elements) ⇒ {
       //println ("operator.WorldUpdated")
-      val worldPrinter:WorldPrinter = world.printer
       world.setElements(elements)
-      val stringWorld: String = worldPrinter.toAsciiSquare(world)
-      //println(s"-------------\n$stringWorld")
-      Application.lifeChannel.push(Json.toJson(World(stringWorld)))
+
+      listener.worldUpdated(world)
 
       currentIteration += 1
       if (currentIteration >= iterations) {
-        worldPrinter.printEndOfTheWorld ()
+        //TODO remove?
+        world.printer.printEndOfTheWorld ()
         iterations = 0
         currentIteration = 0
       } else {
         Thread.sleep(100)
         sender ! CalculateNewState(world)
       }
-    }
-    case StartWorldProcessing(world:LifeGameWorldModel, iterations:Int) => {
-      //println ("operator.InitWord")
-      if (alreadyRunning) throw new ConcurrentModificationException("Should not happen")
-      this.world = world
-
-      this.iterations = iterations
-      this.currentIteration = 0
-
-      val worldPrinter:WorldPrinter = world.printer
-
-      //TODO run standalone
-      val json: JsValue = Json.toJson(World(worldPrinter.toAsciiSquare(world)))
-      Application.lifeChannel.push(json)
-
-      master ! CalculateNewState(world)
     }
   }
 
@@ -136,8 +129,8 @@ object LifeActors {
   val system = ActorSystem("life-model-calculations")
   val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
 
-  def run (world:WorldModel, iterations:Int) {
-    operator ! StartWorldProcessing(world, iterations)
+  def run (world:WorldModel, listener: WorldModelListener, iterations:Int) {
+    operator ! StartWorldProcessing(world, listener, iterations)
   }
 
   def stop = {} //TODO

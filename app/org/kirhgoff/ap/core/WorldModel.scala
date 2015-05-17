@@ -2,6 +2,7 @@ package org.kirhgoff.ap.core
 
 import org.kirhgoff.ap.model.lifegame.LifeGameElement
 
+//TODO Make it immutable, remove setElements
 trait WorldModel {
 
   //TODO create separate class WorldGeometry?
@@ -17,6 +18,8 @@ trait WorldModel {
 //  def mergeChanges():Unit
 
   def printer:WorldPrinter
+  def makeMerger: WorldModelMerger = ???
+
 }
 
 /**
