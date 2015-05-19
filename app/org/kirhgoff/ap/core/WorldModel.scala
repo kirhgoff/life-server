@@ -43,6 +43,10 @@ abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
    * -567-
    * -----
    */
+  def getEnvironmentFor(x:Int, y:Int):Environment = {
+    getEnvironmentFor(getElementAt(x, y))
+  }
+
   override def getEnvironmentFor(element: Element):Environment = {
     val e:LifeGameElement = element match {
       case x:LifeGameElement => x
@@ -69,8 +73,8 @@ abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
 
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))
 
-  def indexFor(e:Element) = indexFor(e.x, e.y)
-  def indexFor(x:Int, y:Int) = {
+  def indexFor(e:Element):Int = indexFor(e.x, e.y)
+  def indexFor(x:Int, y:Int):Int = {
     var newX  = x
     var newY = y
     if (x < 0) {

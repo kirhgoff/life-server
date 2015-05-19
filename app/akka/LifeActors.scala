@@ -80,7 +80,7 @@ class ElementBatchProcessorActor(nrOfWorkers: Int)  extends Actor {
  */
 class PlayWorldRunnerActor(val workers: Int) extends Actor {
   var iterations:Int = 0
-  var currentIteration:Int = 0
+  var currentIteration:Int = -1
   var world:WorldModel = null
   var listener:WorldModelListener = null
 
@@ -110,7 +110,7 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
         //TODO remove?
         world.printer.printEndOfTheWorld ()
         iterations = 0
-        currentIteration = 0
+        currentIteration = -1
       } else {
         Thread.sleep(100)
         sender ! CalculateNewState(world)
@@ -119,7 +119,7 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
   }
 
   def alreadyRunning: Boolean = {
-    this.iterations != 0 || this.currentIteration != null
+    this.iterations != 0 || this.currentIteration != -1
   }
 }
 

@@ -1,17 +1,36 @@
 package scala
 
-import org.kirhgoff.ap.core.WorldPrinter
+import org.kirhgoff.ap.core._
 import org.kirhgoff.ap.model.lifegame._
 import org.specs2.mutable.Specification
 
 import scala.util.Random
 
 class LifeGameModelSpec extends Specification {
-  //def actorRefFactory = system
+
+  val generator = new LifeGameWorldGenerator()
+
+  implicit def castToLifeModel (e:Element):LifeGameElement = e.asInstanceOf[LifeGameElement]
+  implicit def castToLifeModel (e:Environment):CloseSurroundings = e.asInstanceOf[CloseSurroundings]
+
+  def generate(width: Int, height: Int): LifeGameWorldModel = {
+    generator.generate(width, height).asInstanceOf[LifeGameWorldModel]
+  }
+
+  def print(world:WorldModel) = world.printer.toAsciiSquare(world)
+
+  def make(aliveCount:Int) = {
+    val result = Array.ofDim[Boolean](8)
+    //todo find functional solution
+    for (index <- 0 to 7) {
+      result(index) = index < aliveCount
+    }
+    CloseSurroundings(Random.shuffle(result.toSeq).toArray[Boolean])
+  }
 
   "WorldGenerator" should {
     "generate one-cell world" in {
-      val world = LifeGameWorldGenerator.generate(1, 1)
+      val world = generate(1, 1)
       world.getElements shouldNotEqual null
       world.getElements.length shouldEqual 1
       world.getElements(0) shouldNotEqual null
@@ -21,7 +40,10 @@ class LifeGameModelSpec extends Specification {
     }
 
     "generate bigger worlds" in {
-      val world = LifeGameWorldGenerator.generate(2, 2)
+      val width: Int = 2
+      val height: Int = 2
+      val world = generate(width, height)
+
       world.getElements shouldNotEqual null
       world.getElements.length shouldEqual 4
       world.getElements(3) shouldNotEqual null
@@ -35,17 +57,17 @@ class LifeGameModelSpec extends Specification {
   "WorldPrinter" should {
 
     "print an empty world" in {
-      print(LifeGameWorldGenerator.generate(1, 1)) shouldEqual "0"
+      print(generate(1, 1)) shouldEqual "0"
     }
 
     "print a small world" in {
-      print(LifeGameWorldGenerator.generate(2, 2)) shouldEqual "00\n00"
+      print(generate(2, 2)) shouldEqual "00\n00"
     }
   }
 
   "WorldModel" should {
     "calculate indices correctly" in {
-      val world = LifeGameWorldGenerator.generate (2, 2)
+      val world = generate(2, 2)
 
       world.indexFor(0, 0) shouldEqual 0
       world.indexFor(1, 0) shouldEqual 1
@@ -56,31 +78,37 @@ class LifeGameModelSpec extends Specification {
       world.indexFor(-1, -1) shouldEqual 3
     }
 
+//    def setAlive (alive, world:LifeGameWorldModel, x, y) = {
+//      val element = world.getElementAt(x, y)
+//      element.asInstanceOf[LifeGameElement].setAlive(alive)
+//    }
+
+
     "give surroundings correctly" in {
-      val world = LifeGameWorldGenerator.generate (3, 3)
+      val world = generate(3, 3)
       world.getElementAt(1, 1).setAlive(true)
 
-      LifeGameElement.sum(world.giveEnvironmentFor(1, 1)) shouldEqual 0
-      LifeGameElement.sum(world.giveEnvironmentFor(0, 1)) shouldEqual 1
-      LifeGameElement.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 1
+      LifeGameElement.sum(world.getEnvironmentFor(1, 1)) shouldEqual 0
+      LifeGameElement.sum(world.getEnvironmentFor(0, 1)) shouldEqual 1
+      LifeGameElement.sum(world.getEnvironmentFor(2, 2)) shouldEqual 1
     }
 
     "give surroundings correctly 2" in {
-      val world = LifeGameWorldGenerator.generate (5, 5)
+      val world = generate(5, 5)
       world.getElementAt(1, 2).setAlive(true)
       world.getElementAt(2, 2).setAlive(true)
       world.getElementAt(3, 2).setAlive(true)
 
-      LifeGameElement.sum(world.giveEnvironmentFor(1, 2)) shouldEqual 1
-      LifeGameElement.sum(world.giveEnvironmentFor(2, 2)) shouldEqual 2
-      LifeGameElement.sum(world.giveEnvironmentFor(3, 2)) shouldEqual 1
+      LifeGameElement.sum(world.getEnvironmentFor(1, 2)) shouldEqual 1
+      LifeGameElement.sum(world.getEnvironmentFor(2, 2)) shouldEqual 2
+      LifeGameElement.sum(world.getEnvironmentFor(3, 2)) shouldEqual 1
 
-      LifeGameElement.sum(world.giveEnvironmentFor(2, 1)) shouldEqual 3
-      LifeGameElement.sum(world.giveEnvironmentFor(2, 3)) shouldEqual 3
+      LifeGameElement.sum(world.getEnvironmentFor(2, 1)) shouldEqual 3
+      LifeGameElement.sum(world.getEnvironmentFor(2, 3)) shouldEqual 3
     }
 
     "order elements correctly in array" in {
-      val world = LifeGameWorldGenerator.generate (2, 2)
+      val world = generate(2, 2)
       val elements = world.getElements
       elements.length shouldEqual 4
       elements(0) shouldEqual new LifeGameElement(0, 0, world)
@@ -90,7 +118,7 @@ class LifeGameModelSpec extends Specification {
     }
 
     "return correct elements" in {
-      val world = LifeGameWorldGenerator.generate (2, 2)
+      val world = generate(2, 2)
       world.getElementAt(0, 1).setAlive(true)
       val elem = world.getElementAt(0, 1)
       elem.x shouldEqual 0
@@ -111,7 +139,7 @@ class LifeGameModelSpec extends Specification {
 
   "Element" should {
     "live as brick" in {
-      val world = LifeGameWorldGenerator.generate (4, 4)
+      val world = generate(4, 4)
       world.getElementAt(1, 1).setAlive(true)
       world.getElementAt(2, 1).setAlive(true)
       world.getElementAt(1, 2).setAlive(true)
@@ -125,7 +153,7 @@ class LifeGameModelSpec extends Specification {
     }
 
     "momentarily die" in {
-      val world = LifeGameWorldGenerator.generate (3, 3)
+      val world = generate(3, 3)
       world.getElementAt(1, 1).setAlive(true)
 
       print(world) shouldEqual "000\n010\n000"
@@ -136,7 +164,7 @@ class LifeGameModelSpec extends Specification {
     }
 
     "oscilate" in {
-      val world = LifeGameWorldGenerator.generate (5, 5)
+      val world = generate(5, 5)
       world.getElementAt(1, 2).setAlive(true)
       world.getElementAt(2, 2).setAlive(true)
       world.getElementAt(3, 2).setAlive(true)
@@ -144,7 +172,7 @@ class LifeGameModelSpec extends Specification {
       print(world) shouldEqual "00000\n00000\n01110\n00000\n00000"
 
       val elem: LifeGameElement = world.getElementAt(1, 2)
-      val value = world.giveEnvironmentFor(1, 2)
+      val value = world.getEnvironmentFor(1, 2)
       elem.isAlive shouldEqual true
       LifeGameElement.sum(value) shouldEqual 1
       LifeGameElement.shouldBeAlive(true, value) shouldEqual false
@@ -162,7 +190,7 @@ class LifeGameModelSpec extends Specification {
     }
 
     "correctly process its state" in {
-      val world = LifeGameWorldGenerator.generate(10, 10)
+      val world = generate(10, 10)
       val element = new LifeGameElement(50, 50, world)
 
       element.setAlive(true)
@@ -186,16 +214,5 @@ class LifeGameModelSpec extends Specification {
       element.calculateNewState (make(7)).isAlive shouldEqual false
 
     }
-  }
-
-  def print(world:LifeGameWorldModel) = new WorldPrinter('1', '0').toAsciiSquare(world)
-
-  def make(aliveCount:Int) = {
-    val result = Array.ofDim[Boolean](8)
-    //todo find functional solution
-    for (index <- 0 to 7) {
-      result(index) = index < aliveCount
-    }
-    WorldDimension(Random.shuffle(result.toSeq).toArray[Boolean])
   }
 }

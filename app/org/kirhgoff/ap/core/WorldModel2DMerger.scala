@@ -36,5 +36,5 @@ class WorldModel2DMerger(width:Int, height:Int, elements:List[Element], val elem
 
   //TODO create PrintableWorld trait
   override def printer: WorldPrinter = throw new IllegalAccessException("Should never be called")
-  override def merger = this
+  override def makeMerger: WorldModelMerger = throw new IllegalAccessException("Should never be called")
 }

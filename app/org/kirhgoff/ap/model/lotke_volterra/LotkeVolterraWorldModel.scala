@@ -12,10 +12,27 @@ import scala.util.Random
 // Model
 //---------------------------------
 
+class LotkeVolterraElementMerger extends ElementMerger {
+  override def createdElement(target: Element, update: Element): Element = {
+    (target, update) match {
+      case (_: EmptyElement, _: Element) => update
+      case (_: Hunter, _: Prey) => target
+      case (_: Prey, _: Hunter) => update
+      case (one: Prey, another: Prey) => whoHaveMoreEnergy(one, another)
+      case (one: Hunter, another: Hunter) => whoHaveMoreEnergy(one, another)
+      case _ => throw new IllegalArgumentException("Can be only Empty, Prey or Hunter!")
+    }
+  }
+
+  def whoHaveMoreEnergy(one: Being, another: Being): Being = {
+    if (one.currentEnergy > another.currentEnergy) one else another
+  }
+}
+
 class LotkeVolterraWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
-  //TODO optimize
-  override def printer: WorldPrinter = new LotkeVolterraWorldPrinter('p', 'H', ' ')
-  override def  merger = new WorldModel2DMerger(width, height)
+  val printer: WorldPrinter = new LotkeVolterraWorldPrinter('p', 'H', ' ')
+  val elementMerger = new LotkeVolterraElementMerger()
+  override def makeMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
 }
 
 //-------------------------------
@@ -27,6 +44,8 @@ class LotkaVolterraWorldGenerator(val lifeRatio: Double, val preyHunterRatio:Dou
   val hunterStrategy:Strategy = null
   val preyStrategy:Strategy = null
 
+  def this() = this(2d, 2d)
+
   def createWorld(width: Int, height: Int): WorldModel = {
     new LotkeVolterraWorldModel(width, height)
   }
@@ -36,8 +55,8 @@ class LotkaVolterraWorldGenerator(val lifeRatio: Double, val preyHunterRatio:Dou
 
     random.nextDouble() > lifeRatio match {
       case true => random.nextDouble > preyHunterRatio match {
-        case true => new Being(Hunter, x, y, PredatorMaturityAge, InitialPredatorEnergy)
-        case false => new Being(Prey, x, y, PreyMaturityAge, InitialPreyEnergy)
+        case true => new Hunter (x, y, PredatorMaturityAge, InitialPredatorEnergy)
+        case false => new Prey (x, y, PreyMaturityAge, InitialPreyEnergy)
       }
       case false => new EmptyElement(x, y)
     }
@@ -53,20 +72,17 @@ class LotkeVolterraWorldPrinter(val preySymbol:Char, val hunterSymbol:Char, empt
     element match {
       case e: LifeGameElement =>  if (element.isAlive) {
         g.fillRect((e.x*cellWidth).toInt, (e.y*cellHeight).toInt, cellWidth.toInt, cellHeight.toInt)
-        //TODO draw symbol or change color for kinds
+        //TODO draw symbol or change color for every class
       }
-
       case _ => throw new IllegalArgumentException("Incorrect element class")
     }
   }
 
   def renderElement(element:Element, asci: Array[Array[Char]]) = {
     asci(element.y)(element.x) = element match {
-      case e: Being =>  e.kind match {
-        case Prey => preySymbol
-        case Hunter => hunterSymbol
-      }
-      case e:EmptyElement => emptySymbol
+      case _:Prey => preySymbol
+      case _:Hunter => hunterSymbol
+      case _:EmptyElement => emptySymbol
       case _ => throw new IllegalArgumentException("Incorrect element class")
     }
   }
@@ -85,14 +101,28 @@ object LotkeVolterraWorldModel {
   val PreyMaturityAge = 2
   val PredatorMaturityAge = 2
 
+  //Starter parameters
+  val Width = 10
+  val Height = 10
+  val Iterations: Int = 10
+  val LifeRatio: Double = 0.5
+  val PreyHunterRatio: Double = 0.5
+
   def main (args: Array[String]) {
     println("Starting Lotke-Volterra...")
-    val world: WorldModel = new LotkaVolterraWorldGenerator(0.5, 0.5).generate(10, 10)
-
+    val world: WorldModel = new LotkaVolterraWorldGenerator(LifeRatio, PreyHunterRatio).generate(Width, Height)
+    val printer = world.printer
+    val listener = new WorldModelListener {
+      override def worldUpdated(world: WorldModel): Unit = {
+        println("________________________________")
+        println(printer.toAsciiSquare(world))
+      }
+    }
     println("-----------------------" +
-      "Started with world:\n" +
+      s"Started with world: ${}\n" +
       world.printer.toAsciiSquare(world))
 
-    LifeActors.run(world, 10)
+    LifeActors.run(world, listener, Iterations)
   }
 }
+

@@ -1,5 +1,7 @@
 package org.kirhgoff.ap.core
 
+import org.kirhgoff.ap.model.lifegame.LifeGameElement
+
 trait Element {
   //TODO remove from element
   def x:Int

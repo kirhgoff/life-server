@@ -3,8 +3,12 @@ package org.kirhgoff.ap.model.lifegame
 import org.kirhgoff.ap.core._
 
 
-class LifeGameElement(val x:Int, val y:Int, val alive:Boolean, world:LifeGameWorldModel) extends Element{
+class LifeGameElement(val x:Int, val y:Int, var alive:Boolean, world:LifeGameWorldModel) extends Element{
+
+  def this(x:Int, y:Int, world:LifeGameWorldModel) = this(x, y, false, world)
+
   def isAlive = alive
+  def setAlive(alive:Boolean) = this.alive = alive
 
   def calculateNewState(value:Environment):LifeGameElement = {
     value match {
@@ -42,6 +46,7 @@ object LifeGameElement {
     val summa = sum(value)
     (alive && (summa == 2 || summa == 3)) || (!alive && summa == 3)
   }
+
 
 }
 

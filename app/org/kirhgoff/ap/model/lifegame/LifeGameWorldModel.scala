@@ -10,9 +10,16 @@ import scala.util.Random
 // Model
 //---------------------------------
 
+class LifeGameElementMerger extends ElementMerger () {
+  override def createdElement(target: Element, update: Element): Element = {
+    if (update.isAlive) update else target
+  }
+}
+
 class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
   val printer = new LifeGameWorldPrinter ('0', '-')
-  override def makeMerger: WorldModel2DMerger = new WorldModel2DMerger(width, height, getElements)
+  val elementMerger = new LifeGameElementMerger ()
+  override def makeMerger: WorldModelMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
 }
 
 //-------------------------------
@@ -22,6 +29,8 @@ class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, heig
 class LifeGameWorldGenerator(val percentOfLife:Double) extends WorldGenerator {
 
   val random = new Random
+
+  def this() = this(2d)
 
   def createWorld(width: Int, height: Int): WorldModel = {
     new LifeGameWorldModel(width, height)
