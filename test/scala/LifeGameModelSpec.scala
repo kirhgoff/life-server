@@ -8,13 +8,17 @@ import scala.util.Random
 
 class LifeGameModelSpec extends Specification {
 
-  val generator = new LifeGameWorldGenerator()
+  private val printer: LifeGameWorldPrinter = new LifeGameWorldPrinter('1', '0')
+  private val generator = new LifeGameWorldGenerator(printer)
+
+  // -------------Utility methods -------------
 
   implicit def castToLifeModel (e:Element):LifeGameElement = e.asInstanceOf[LifeGameElement]
   implicit def castToLifeModel (e:Environment):CloseSurroundings = e.asInstanceOf[CloseSurroundings]
+  implicit def castToLifeModel (w:WorldModel):LifeGameWorldModel = w.asInstanceOf[LifeGameWorldModel]
 
   def generate(width: Int, height: Int): LifeGameWorldModel = {
-    generator.generate(width, height).asInstanceOf[LifeGameWorldModel]
+    generator.generate(width, height)
   }
 
   def print(world:WorldModel) = world.printer.toAsciiSquare(world)
@@ -27,6 +31,8 @@ class LifeGameModelSpec extends Specification {
     }
     CloseSurroundings(Random.shuffle(result.toSeq).toArray[Boolean])
   }
+
+  //------------------------ Tests --------------
 
   "WorldGenerator" should {
     "generate one-cell world" in {

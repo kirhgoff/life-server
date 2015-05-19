@@ -17,6 +17,7 @@ trait WorldModel {
 //  def collectChanges(elementsToCreate: List[Element], elementsToRemove: List[Element]):Unit
 //  def mergeChanges():Unit
 
+  //TODO should not be here
   def printer:WorldPrinter
   def makeMerger: WorldModelMerger = ???
 

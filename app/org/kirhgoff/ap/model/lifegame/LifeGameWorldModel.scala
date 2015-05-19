@@ -16,8 +16,7 @@ class LifeGameElementMerger extends ElementMerger () {
   }
 }
 
-class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
-  val printer = new LifeGameWorldPrinter ('0', '-')
+class LifeGameWorldModel(width:Int, height:Int, val printer:WorldPrinter) extends WorldModel2D(width, height) {
   val elementMerger = new LifeGameElementMerger ()
   override def makeMerger: WorldModelMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
 }
@@ -26,14 +25,18 @@ class LifeGameWorldModel(width:Int, height:Int) extends WorldModel2D(width, heig
 // Generator
 //---------------------------------
 
-class LifeGameWorldGenerator(val percentOfLife:Double) extends WorldGenerator {
+class LifeGameWorldGenerator(val percentOfLife:Double, val printer:WorldPrinter) extends WorldGenerator {
+  //TODO make constant
+  //final val StandardPrinter = new LifeGameWorldPrinter ('0', '-')
+
+  def this() = this(2d, new LifeGameWorldPrinter ('0', '-'))
+  def this(percentOfLife:Double) = this(percentOfLife, new LifeGameWorldPrinter ('0', '-'))
+  def this(printer:LifeGameWorldPrinter) = this(2d, printer)
 
   val random = new Random
 
-  def this() = this(2d)
-
   def createWorld(width: Int, height: Int): WorldModel = {
-    new LifeGameWorldModel(width, height)
+    new LifeGameWorldModel(width, height, printer)
   }
 
   def generateElement(x:Int, y:Int, world:WorldModel):Element = {
@@ -43,6 +46,7 @@ class LifeGameWorldGenerator(val percentOfLife:Double) extends WorldGenerator {
     }
   }
 }
+
 
 //-------------------------------
 // Printer
