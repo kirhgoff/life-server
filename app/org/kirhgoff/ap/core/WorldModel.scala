@@ -53,24 +53,23 @@ abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
     getEnvironmentFor(getElementAt(x, y))
   }
 
-  override def getEnvironmentFor(element: Element):Environment = {
+  def getSurroundingElements(element: Element): Array[Element] = {
     val x = element.x
     val y = element.y
 
     val elements = getElements
-    val result = new Array[Boolean] (8)
-    result(0) = elements(indexFor(x-1, y-1)).isAlive
-    result(1) = elements(indexFor(x,   y-1)).isAlive
-    result(2) = elements(indexFor(x+1, y-1)).isAlive
+    val result = new Array[Element](8)
+    result(0) = elements(indexFor(x - 1, y - 1))
+    result(1) = elements(indexFor(x, y - 1))
+    result(2) = elements(indexFor(x + 1, y - 1))
 
-    result(3) = elements(indexFor(x-1, y)).isAlive
-    result(4) = elements(indexFor(x+1, y)).isAlive
+    result(3) = elements(indexFor(x - 1, y))
+    result(4) = elements(indexFor(x + 1, y))
 
-    result(5) = elements(indexFor(x-1, y+1)).isAlive
-    result(6) = elements(indexFor(x,   y+1)).isAlive
-    result(7) = elements(indexFor(x+1, y+1)).isAlive
-
-    CloseSurroundings(result)
+    result(5) = elements(indexFor(x - 1, y + 1))
+    result(6) = elements(indexFor(x, y + 1))
+    result(7) = elements(indexFor(x + 1, y + 1))
+    result
   }
 
   def getElementAt(x: Int, y: Int) = elements(indexFor(x, y))

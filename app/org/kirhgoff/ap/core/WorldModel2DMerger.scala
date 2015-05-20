@@ -13,8 +13,6 @@ class WorldModel2DMerger(width:Int, height:Int, elements:List[Element], val elem
 
   //TODO use world-specific element mergers
   def merge(newState:Element, created:List[Element], removed:List[Element]) = {
-    //Update state
-    results(indexFor(newState)) = newState
 
     removed.map{
       remove:Element => {
@@ -37,4 +35,6 @@ class WorldModel2DMerger(width:Int, height:Int, elements:List[Element], val elem
   //TODO create PrintableWorld trait
   override def printer: WorldPrinter = throw new IllegalAccessException("Should never be called")
   override def makeMerger: WorldModelMerger = throw new IllegalAccessException("Should never be called")
+  //TODO create EnvironmentAware trait
+  override def getEnvironmentFor(element: Element): Environment = throw new IllegalAccessException("Should never be called")
 }

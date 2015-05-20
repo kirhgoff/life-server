@@ -5,6 +5,8 @@ trait Strategy {
 
   def getCreatedElements: List[Element]
   def getRemovedElements: List[Element]
+
+  //TODO remove
   def getNewState:Element
 }
 

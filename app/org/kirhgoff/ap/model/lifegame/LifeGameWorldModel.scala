@@ -19,6 +19,10 @@ class LifeGameElementMerger extends ElementMerger () {
 class LifeGameWorldModel(width:Int, height:Int, val printer:WorldPrinter) extends WorldModel2D(width, height) {
   val elementMerger = new LifeGameElementMerger ()
   override def makeMerger: WorldModelMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
+
+  override def getEnvironmentFor(element: Element):Environment = {
+    CloseSurroundings(getSurroundingElements(element).map(_.isAlive))
+  }
 }
 
 //-------------------------------

@@ -1,18 +1,23 @@
 package org.kirhgoff.ap.model.lotke_volterra
 
-import org.kirhgoff.ap.core.{CloseSurroundings, Element, Environment, Strategy}
+import org.kirhgoff.ap.core._
 
 import scala.collection.mutable
 
 import org.kirhgoff.ap.model.lotke_volterra.LotkeVolterraWorldModel._
+
+import scala.util.Random
 
 abstract class Being(val x:Int, val y:Int, val maturityAge:Int, initialEnergy:Int)
   extends Element
   with Strategy {
 
   implicit def convertLotkaVolterra(e:Element):Being = e.asInstanceOf[Being]
-  implicit def convertLotkaVolterra(e:Environment):CloseSurroundings = e.asInstanceOf[CloseSurroundings]
+  implicit def convertLotkaVolterra(e:Environment):ElementSurroundings = e.asInstanceOf[ElementSurroundings]
   implicit def boolean2Int(b: Boolean):Int = if(b) 1 else 0
+
+  //In heart of every being lives Random
+  val random = new Random()
 
   var currentEnergy: Int = initialEnergy
   var age: Int = 0
@@ -29,19 +34,15 @@ abstract class Being(val x:Int, val y:Int, val maturityAge:Int, initialEnergy:In
   def getRemovedElements: List[Element] = removedElements.toList
   def getCreatedElements: List[Element] = createdElements.toList
 
-  def sum (value:CloseSurroundings) = value.surroundings.foldLeft(0)(_ + boolean2Int(_))
-
-  def feed(environment: Environment) = {}
-  def breed(environment: Environment) = {}
-  def move(environment: Environment) = {}
-
-  def canFeed(env:Environment): Boolean = false
-  def canBreed(environment: Environment): Boolean = false
+  def randomCell(env: Environment, criteria:Element => Boolean = !_.isAlive): Option[Element] = {
+    val cells = env.around.filter(criteria)
+    if (cells.isEmpty) None
+    else Some(cells(random.nextInt(cells.length)))
+  }
 }
 
 class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
   extends Being (x, y, maturityAge, initialEnergy) {
-
 
   override def apply(value: Element, env: Environment): Unit = {
     //TODO excessive code, think about it
@@ -49,33 +50,74 @@ class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
 
     if (canFeed(env)) feed(env)
     else if (canBreed(env)) breed(env)
-    else move(env)
+    else if(canMove(env)) move(env)
+    else currentEnergy = currentEnergy - HunterEnergyDecoyPerTurn
+
+    if (currentEnergy <= 0) removedElements :+ this
   }
-  
+
+  def canFeed (env:Environment) = {
+    val preysAround = env.around.filter(_.isInstanceOf[Prey]).length
+    preysAround > 0
+  }
+
+  def feed(env:Environment) = {
+    val randomPrey:Element = randomCell(env, _.isInstanceOf[Prey]).get
+    removedElements :+ randomPrey
+    currentEnergy += CaloriesPerPrayEnergy * randomPrey.currentEnergy
+  }
+
+  def canBreed (env:Environment) = {
+    val preysAround = env.around.filter(_.isInstanceOf[Prey]).length
+    val matesAround = env.around.filter(_.isInstanceOf[Hunter]).length
+    preysAround > 0 && matesAround > 0
+  }
+
+  def breed(env:Environment) = {
+    val randomFree:Element = randomCell(env, !_.isAlive).get
+    createdElements :+ new Hunter(
+      randomFree.x, randomFree.y, HunterMaturityAge, InitialPreyEnergy
+    )
+  }
+
+  def canMove(env: Environment): Boolean = {
+    val freeSpace = env.around.filter(!_.isAlive).length
+    freeSpace > 0
+  }
+
+  def move(env: Environment) = {
+    removedElements :+ this
+
+    val cell:Element = randomCell(env, !_.isAlive).get
+    createdElements :+ new Hunter(cell.x, cell.y, maturityAge,
+      currentEnergy - HunterEnergyDecoyPerTurn)
+  }
 }
 
 class Prey(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
   extends Being (x, y, maturityAge, initialEnergy) {
+
   override def apply(value: Element, env: Environment): Unit = {
     if (!value.isInstanceOf[Prey]) throw new IllegalStateException("Something is wrong")
 
+    //Like rabbits
     if (canBreed(env)) breed(env)
   }
 
-  override def canBreed(env:Environment) = {
-    val summa:Int = sum(env)
-    summa > 1 && summa < 8
+  //Never change
+  override def getNewState = this
+
+  def canBreed(env:Environment) = {
+    val aliveCount:Int = env.around.filter(_.isAlive).length
+    aliveCount > 1 && aliveCount < 8
   }
 
-  def randomFreeCell(env: Environment): Element = {
-    this
+  def breed (env:Environment) = {
+    val randomFree:Element = randomCell(env, !_.isAlive).get
+    createdElements :+ new Prey(
+      randomFree.x, randomFree.y, PreyMaturityAge, InitialPreyEnergy
+    )
   }
-
-  override def breed (env:Environment) = {
-    val randomFree:Element = randomFreeCell(env)
-    createdElements :+ new Prey(randomFree.x, randomFree.y, 0, InitialPreyEnergy)
-  }
-
 
 }
 

@@ -6,6 +6,7 @@ trait Environment {
 }
 
 case class CloseSurroundings (surroundings:Array[Boolean]) extends Environment
+case class ElementSurroundings (around:Array[Element]) extends Environment
 
 
 

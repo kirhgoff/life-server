@@ -32,10 +32,14 @@ class LotkeVolterraElementMerger extends ElementMerger {
 class LotkeVolterraWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
   val printer: WorldPrinter = new LotkeVolterraWorldPrinter('p', 'H', ' ')
   val elementMerger = new LotkeVolterraElementMerger()
-  override def makeMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
-}
 
-//-------------------------------
+  override def makeMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
+
+  override def getEnvironmentFor(element: Element): Environment = {
+    ElementSurroundings(getSurroundingElements(element))
+  }
+}
+  //-------------------------------
 // Generator
 //---------------------------------
 
@@ -55,7 +59,7 @@ class LotkaVolterraWorldGenerator(val lifeRatio: Double, val preyHunterRatio:Dou
 
     random.nextDouble() > lifeRatio match {
       case true => random.nextDouble > preyHunterRatio match {
-        case true => new Hunter (x, y, PredatorMaturityAge, InitialPredatorEnergy)
+        case true => new Hunter (x, y, HunterMaturityAge, InitialHunterEnergy)
         case false => new Prey (x, y, PreyMaturityAge, InitialPreyEnergy)
       }
       case false => new EmptyElement(x, y)
@@ -98,9 +102,13 @@ object LotkeVolterraWorldModel {
 
   //Constants
   val InitialPreyEnergy = 1
-  val InitialPredatorEnergy = 10
+  val InitialHunterEnergy = 10
+
   val PreyMaturityAge = 2
-  val PredatorMaturityAge = 2
+  val HunterMaturityAge = 2
+
+  val CaloriesPerPrayEnergy = 1
+  val HunterEnergyDecoyPerTurn = 1
 
   //Starter parameters
   val Width = 10
