@@ -1,13 +1,14 @@
 package scala
 
-import org.kirhgoff.ap.core.WorldModel
-import org.kirhgoff.ap.model.lotke_volterra.{Prey, LotkaVolterraWorldGenerator, LotkeVolterraWorldModel}
+import org.kirhgoff.ap.core.{EmptyElement, ElementSurroundings, Environment, WorldModel}
+import org.kirhgoff.ap.model.lotke_volterra.{Hunter, Prey, LotkaVolterraWorldGenerator, LotkeVolterraWorldModel}
 import org.specs2.mutable.Specification
 
 
 class LotkeVolterraModelSpec extends Specification {
 
     implicit def convertLotkaVolterra(w:WorldModel):LotkeVolterraWorldModel = w.asInstanceOf[LotkeVolterraWorldModel]
+    implicit def convertLotkaVolterra(e:Environment):ElementSurroundings = e.asInstanceOf[ElementSurroundings]
 
     "LotkaVolterraWorldGenerator" should {
       "generate one-cell world" in {
@@ -30,8 +31,9 @@ class LotkeVolterraModelSpec extends Specification {
         world.setElementAt(2, 0, new Prey(1, 1, 0, 100))
 
         //should never pick cell on first row
-        for (i <- 0 to 100) {
-          prey.randomFreeCell(world.getEnvironmentFor(prey)).y must beGreaterThan(0)
+        for (i <- 0 to 50) {
+          prey.randomCell(world.getEnvironmentFor(prey), !_.isAlive).get.
+            y must beGreaterThan(0)
         }
         prey.isAlive shouldEqual true
       }
@@ -44,12 +46,43 @@ class LotkeVolterraModelSpec extends Specification {
         world.setElementAt(0, 2, new Prey(1, 1, 0, 100))
 
         //should never pick cell on first row
-        for (i <- 0 to 100) {
-          prey.randomFreeCell(world.getEnvironmentFor(prey)).x must beGreaterThan(0)
+        for (i <- 0 to 50) {
+          prey.randomCell(world.getEnvironmentFor(prey), !_.isAlive).get.
+            x must beGreaterThan(0)
         }
 
         prey.isAlive shouldEqual true
       }
-
     }
+
+  "Hunter" should {
+    "be able to move in empty world" in {
+      val world: WorldModel = new LotkaVolterraWorldGenerator().generate(3, 3)
+      val hunter = new Hunter(1, 1)
+      val env = world.getEnvironmentFor(hunter)
+
+      hunter.canMove(env) should beTrue
+      hunter.canBreed(env) should beFalse
+      hunter.canFeed(env) should beFalse
+    }
+
+    "not be able to move in the world filled with preys and could breed" in {
+      val world: WorldModel = new LotkaVolterraWorldGenerator().generate(3, 3)
+      val hunter = new Hunter(1, 1)
+      var env = world.getEnvironmentFor(hunter)
+      env.around.map(e => world.setElementAt(new Prey(e.x, e.y)))
+
+      env = world.getEnvironmentFor(hunter)
+      hunter.canMove(env) should beFalse
+      hunter.canBreed(env) should beFalse
+      hunter.canFeed(env) should beTrue
+
+      world.setElementAt(new Hunter(2, 2))
+      hunter.canBreed(world.getEnvironmentFor(hunter)) should beFalse
+
+      world.setElementAt(new EmptyElement(0, 2))
+      hunter.canBreed(world.getEnvironmentFor(hunter)) should beTrue
+    }
+
+  }
 }

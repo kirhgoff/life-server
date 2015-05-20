@@ -39,6 +39,7 @@ abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
 
   //TODO fix mutable/immutable issue - only immutables on akka
   def setElementAt(x:Int, y:Int, e:Element) = elements(indexFor(x, y)) = e
+  def setElementAt(e:Element) = elements(indexFor(e.x, e.y)) = e
 
   /**
    *

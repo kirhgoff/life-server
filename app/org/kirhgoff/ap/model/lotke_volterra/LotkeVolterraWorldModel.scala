@@ -107,6 +107,9 @@ object LotkeVolterraWorldModel {
   val PreyMaturityAge = 2
   val HunterMaturityAge = 2
 
+  val HunterBreedThreshold = 1
+  val PreyBreedProbability = 1
+
   val CaloriesPerPrayEnergy = 1
   val HunterEnergyDecoyPerTurn = 1
 

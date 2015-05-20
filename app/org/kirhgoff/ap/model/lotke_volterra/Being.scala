@@ -41,7 +41,7 @@ abstract class Being(val x:Int, val y:Int, val maturityAge:Int, initialEnergy:In
   }
 }
 
-class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
+class Hunter(x:Int, y:Int, maturityAge:Int = HunterMaturityAge, initialEnergy:Int = InitialHunterEnergy)
   extends Being (x, y, maturityAge, initialEnergy) {
 
   override def apply(value: Element, env: Environment): Unit = {
@@ -70,9 +70,12 @@ class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
   def canBreed (env:Environment) = {
     val preysAround = env.around.filter(_.isInstanceOf[Prey]).length
     val matesAround = env.around.filter(_.isInstanceOf[Hunter]).length
-    preysAround > 0 && matesAround > 0
+    //there is a food, a mate and a free space
+    preysAround > 0 && matesAround > 0 &&
+      env.around.length - preysAround - matesAround > 0
   }
 
+  //TODO let know the parent
   def breed(env:Environment) = {
     val randomFree:Element = randomCell(env, !_.isAlive).get
     createdElements :+ new Hunter(
@@ -85,6 +88,7 @@ class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
     freeSpace > 0
   }
 
+  //TODO keep trace
   def move(env: Environment) = {
     removedElements :+ this
 
@@ -94,7 +98,7 @@ class Hunter(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
   }
 }
 
-class Prey(x:Int, y:Int, maturityAge:Int, initialEnergy:Int)
+class Prey(x:Int, y:Int, maturityAge:Int = PreyMaturityAge, initialEnergy:Int = InitialHunterEnergy)
   extends Being (x, y, maturityAge, initialEnergy) {
 
   override def apply(value: Element, env: Environment): Unit = {
