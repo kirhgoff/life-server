@@ -95,6 +95,7 @@ class LotkeVolterraWorldPrinter(val preySymbol:Char, val hunterSymbol:Char, empt
 //---------------------------------
 
 object LotkeVolterraWorldModel {
+
   //Constants
   val InitialPreyEnergy = 1
   val InitialPredatorEnergy = 10

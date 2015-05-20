@@ -42,11 +42,10 @@ class LifeGameElement(val x:Int, val y:Int, var alive:Boolean, world:LifeGameWor
 object LifeGameElement {
   def toInt(b: Boolean) = if(b) 1 else 0
   def sum(value:CloseSurroundings) = value.surroundings.foldLeft(0)(_ + LifeGameElement.toInt(_))
+
   def shouldBeAlive(alive:Boolean, value:CloseSurroundings) = {
     val summa = sum(value)
     (alive && (summa == 2 || summa == 3)) || (!alive && summa == 3)
   }
-
-
 }
 

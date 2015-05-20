@@ -2,6 +2,8 @@ package org.kirhgoff.ap.core
 
 import org.kirhgoff.ap.model.lifegame.LifeGameElement
 
+import scala.collection.mutable
+
 //TODO Make it immutable, remove setElements
 trait WorldModel {
 
@@ -27,13 +29,16 @@ trait WorldModel {
  * Some useful methods
  */
 abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
-  var elements:List[Element] = List()
+  var elements:mutable.MutableList[Element] = mutable.MutableList()
 
-  override def getElements:List[Element] = elements
+  override def getElements:List[Element] = elements.toList
   override def setElements(elements: List[Element]) {
     //println (s"setElements: $elements")
-    this.elements = elements
+    this.elements = mutable.MutableList() ++ elements
   }
+
+  //TODO fix mutable/immutable issue - only immutables on akka
+  def setElementAt(x:Int, y:Int, e:Element) = elements(indexFor(x, y)) = e
 
   /**
    *
@@ -49,12 +54,8 @@ abstract class WorldModel2D(val width:Int, val height:Int) extends WorldModel {
   }
 
   override def getEnvironmentFor(element: Element):Environment = {
-    val e:LifeGameElement = element match {
-      case x:LifeGameElement => x
-      case _ => throw new IllegalArgumentException("Incorrect element type")
-    }
-    val x = e.x
-    val y = e.y
+    val x = element.x
+    val y = element.y
 
     val elements = getElements
     val result = new Array[Boolean] (8)
