@@ -114,9 +114,9 @@ object LotkeVolterraWorldModel {
   val HunterEnergyDecoyPerTurn = 1
 
   //Starter parameters
-  val Width = 10
-  val Height = 10
-  val Iterations: Int = 10
+  val Width = 5
+  val Height = 5
+  val Iterations: Int = 3
   val LifeRatio: Double = 0.5
   val PreyHunterRatio: Double = 0.5
 

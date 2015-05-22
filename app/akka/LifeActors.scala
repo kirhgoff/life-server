@@ -16,6 +16,8 @@ case class CalculateNewState(world:WorldModel) extends RunnerMessage
 case class ProcessElement(element:Element, environment:Environment) extends RunnerMessage
 case class ElementUpdated(newState:Element, created:List[Element], removed:List[Element]) extends RunnerMessage
 case class WorldUpdated(elements:List[Element]) extends RunnerMessage
+case class InterruptWork() extends RunnerMessage
+
 //TODO updated
 
 /**
@@ -84,7 +86,7 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
   var world:WorldModel = null
   var listener:WorldModelListener = null
 
-  val master = LifeActors.system.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
+  val master = context.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
 
   def receive = {
     case StartWorldProcessing(world:WorldModel, listener:WorldModelListener, iterations:Int) => {
@@ -107,14 +109,18 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
 
       currentIteration += 1
       if (currentIteration >= iterations) {
-        //TODO remove?
-        world.printer.printEndOfTheWorld ()
         iterations = 0
         currentIteration = -1
+        //Stop system
+        context.system.shutdown()
       } else {
         Thread.sleep(100)
         sender ! CalculateNewState(world)
       }
+    }
+    case InterruptWork => {
+      //Stop system
+      context.system.shutdown()
     }
   }
 
@@ -126,12 +132,13 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
 
 object LifeActors {
   val workers = 100
-  val system = ActorSystem("life-model-calculations")
-  val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
 
   def run (world:WorldModel, listener: WorldModelListener, iterations:Int) {
+    val system = ActorSystem(s"life-model-calculations-world-${world.getClass.getSimpleName}-${world.hashCode}")
+    val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
+
     operator ! StartWorldProcessing(world, listener, iterations)
   }
 
-  def stop = {} //TODO
+  def stop = {} //TODO ! InterruptWork
 }

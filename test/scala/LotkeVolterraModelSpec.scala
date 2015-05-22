@@ -1,6 +1,7 @@
 package scala
 
-import org.kirhgoff.ap.core.{EmptyElement, ElementSurroundings, Environment, WorldModel}
+import akka.LifeActors
+import org.kirhgoff.ap.core._
 import org.kirhgoff.ap.model.lotke_volterra.{Hunter, Prey, LotkaVolterraWorldGenerator, LotkeVolterraWorldModel}
 import org.specs2.mutable.Specification
 
@@ -84,5 +85,22 @@ class LotkeVolterraModelSpec extends Specification {
       hunter.canBreed(world.getEnvironmentFor(hunter)) should beTrue
     }
 
+  }
+
+  "LotkeVolterraWorldModel" should {
+    "multiply number of preys in peaceful world" in {
+      val world: WorldModel = new LotkaVolterraWorldGenerator().generate(3, 3)
+      world.setElementAt(new Prey(1, 1))
+      world.setElementAt(new Prey(0, 1))
+
+      var finalWorld:WorldModel = world
+      LifeActors.run(world, new WorldModelListener {
+        override def worldUpdated(world: WorldModel): Unit = {
+          finalWorld = world
+        }
+      }, 3)
+      val alive = finalWorld.getElements.filter(_.isAlive)
+      alive.length should beGreaterThan(2)
+    }
   }
 }
