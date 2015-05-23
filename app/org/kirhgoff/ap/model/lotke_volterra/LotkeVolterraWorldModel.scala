@@ -30,7 +30,7 @@ class LotkeVolterraElementMerger extends ElementMerger {
 }
 
 class LotkeVolterraWorldModel(width:Int, height:Int) extends WorldModel2D(width, height) {
-  val printer: WorldPrinter = new LotkeVolterraWorldPrinter('p', 'H', ' ')
+  val printer: WorldPrinter = new LotkeVolterraWorldPrinter('o', 'X', ' ')
   val elementMerger = new LotkeVolterraElementMerger()
 
   override def makeMerger = new WorldModel2DMerger(width, height, getElements, elementMerger)
@@ -130,9 +130,6 @@ object LotkeVolterraWorldModel {
         println(printer.toAsciiSquare(world))
       }
     }
-    println("-----------------------" +
-      s"Started with world: ${}\n" +
-      world.printer.toAsciiSquare(world))
 
     LifeActors.run(world, listener, Iterations)
   }

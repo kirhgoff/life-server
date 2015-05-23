@@ -85,6 +85,28 @@ class LotkeVolterraModelSpec extends Specification {
       hunter.canBreed(world.getEnvironmentFor(hunter)) should beTrue
     }
 
+    "provide correct updates to world" in {
+      val world: WorldModel = new LotkaVolterraWorldGenerator().generate(3, 3)
+      val hunter = new Hunter(1, 1)
+      world.setElementAt(new Prey(0, 0))
+
+      hunter.apply(hunter, world.getEnvironmentFor(hunter))
+      hunter.getRemovedElements.length shouldEqual 2
+      hunter.getCreatedElements.length shouldEqual 1
+    }
+  }
+
+  "Prey" should {
+    "provide correct updates to world" in {
+      val world: WorldModel = new LotkaVolterraWorldGenerator().generate(3, 3)
+      val prey = new Prey(1, 1)
+      world.setElementAt(prey)
+      world.setElementAt(new Prey(0, 0))
+
+      prey.apply(prey, world.getEnvironmentFor(prey))
+      prey.getRemovedElements.length shouldEqual 0
+      prey.getCreatedElements.length shouldEqual 1
+    }
   }
 
   "LotkeVolterraWorldModel" should {
@@ -93,14 +115,16 @@ class LotkeVolterraModelSpec extends Specification {
       world.setElementAt(new Prey(1, 1))
       world.setElementAt(new Prey(0, 1))
 
-      var finalWorld:WorldModel = world
+      var finalWorld:WorldModel = null
       LifeActors.run(world, new WorldModelListener {
         override def worldUpdated(world: WorldModel): Unit = {
           finalWorld = world
+          println("--------------")
+          println(finalWorld.printer.toAsciiSquare(finalWorld))
         }
       }, 3)
       val alive = finalWorld.getElements.filter(_.isAlive)
-      alive.length should beGreaterThan(2)
+      alive.length shouldEqual 9
     }
   }
 }

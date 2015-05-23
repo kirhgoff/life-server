@@ -63,8 +63,12 @@ class Hunter(x:Int, y:Int, maturityAge:Int = HunterMaturityAge, initialEnergy:In
 
   def feed(env:Environment) = {
     val randomPrey:Element = randomCell(env, _.isInstanceOf[Prey]).get
-    removedElements :+ randomPrey
-    currentEnergy += CaloriesPerPrayEnergy * randomPrey.currentEnergy
+    removedElements += randomPrey
+    //Move to new position
+    removedElements += this
+    createdElements += new Hunter(randomPrey.x, randomPrey.y, maturityAge,
+      CaloriesPerPrayEnergy * randomPrey.currentEnergy - HunterEnergyDecoyPerTurn)
+
   }
 
   def canBreed (env:Environment) = {
@@ -78,7 +82,7 @@ class Hunter(x:Int, y:Int, maturityAge:Int = HunterMaturityAge, initialEnergy:In
   //TODO let know the parent
   def breed(env:Environment) = {
     val randomFree:Element = randomCell(env, !_.isAlive).get
-    createdElements :+ new Hunter(
+    createdElements += new Hunter(
       randomFree.x, randomFree.y, HunterMaturityAge, InitialPreyEnergy
     )
   }
@@ -90,10 +94,10 @@ class Hunter(x:Int, y:Int, maturityAge:Int = HunterMaturityAge, initialEnergy:In
 
   //TODO keep trace
   def move(env: Environment) = {
-    removedElements :+ this
+    removedElements += this
 
     val cell:Element = randomCell(env, !_.isAlive).get
-    createdElements :+ new Hunter(cell.x, cell.y, maturityAge,
+    createdElements += new Hunter(cell.x, cell.y, maturityAge,
       currentEnergy - HunterEnergyDecoyPerTurn)
   }
 }
@@ -113,12 +117,12 @@ class Prey(x:Int, y:Int, maturityAge:Int = PreyMaturityAge, initialEnergy:Int = 
 
   def canBreed(env:Environment) = {
     val aliveCount:Int = env.around.filter(_.isAlive).length
-    aliveCount > 1 && aliveCount < 8
+    aliveCount > 0 && aliveCount < 8
   }
 
   def breed (env:Environment) = {
     val randomFree:Element = randomCell(env, !_.isAlive).get
-    createdElements :+ new Prey(
+    createdElements += new Prey(
       randomFree.x, randomFree.y, PreyMaturityAge, InitialPreyEnergy
     )
   }

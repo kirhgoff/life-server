@@ -102,7 +102,7 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
       master ! CalculateNewState(world)
     }
     case WorldUpdated(elements) ⇒ {
-      //println ("operator.WorldUpdated")
+      //println (s"operator.WorldUpdated $currentIteration")
       world.setElements(elements)
 
       listener.worldUpdated(world)
@@ -114,7 +114,6 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
         //Stop system
         context.system.shutdown()
       } else {
-        Thread.sleep(100)
         sender ! CalculateNewState(world)
       }
     }
@@ -134,11 +133,11 @@ object LifeActors {
   val workers = 100
 
   def run (world:WorldModel, listener: WorldModelListener, iterations:Int) {
-    val system = ActorSystem(s"life-model-calculations-world-${world.getClass.getSimpleName}-${world.hashCode}")
+    val system  = ActorSystem(s"life-model-calculations-world-${world.getClass.getSimpleName}-${world.hashCode}")
     val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
 
     operator ! StartWorldProcessing(world, listener, iterations)
   }
 
-  def stop = {} //TODO ! InterruptWork
+  def stop = {}
 }
