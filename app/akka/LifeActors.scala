@@ -139,5 +139,7 @@ object LifeActors {
     operator ! StartWorldProcessing(world, listener, iterations)
   }
 
+  //TODO create sync method
+
   def stop = {}
 }

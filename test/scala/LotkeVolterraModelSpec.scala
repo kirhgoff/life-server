@@ -115,16 +115,23 @@ class LotkeVolterraModelSpec extends Specification {
       world.setElementAt(new Prey(1, 1))
       world.setElementAt(new Prey(0, 1))
 
-      var finalWorld:WorldModel = null
-      LifeActors.run(world, new WorldModelListener {
-        override def worldUpdated(world: WorldModel): Unit = {
-          finalWorld = world
-          println("--------------")
-          println(finalWorld.printer.toAsciiSquare(finalWorld))
-        }
-      }, 3)
-      val alive = finalWorld.getElements.filter(_.isAlive)
+      val listener = new TestListener
+      LifeActors.run(world, listener, 3)
+      //TODO remove me
+      Thread.sleep(2000)
+      val alive = listener.finalWorld.getElements.filter(_.isAlive)
       alive.length shouldEqual 9
     }
   }
 }
+
+class TestListener extends WorldModelListener  {
+    var finalWorld:WorldModel = null
+
+    override def worldUpdated(world: WorldModel): Unit = {
+      this.finalWorld = world
+      println("--------------")
+      println(world.printer.toAsciiSquare(world))
+    }
+}
+
