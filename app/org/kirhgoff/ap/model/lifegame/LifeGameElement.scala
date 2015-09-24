@@ -40,6 +40,7 @@ class LifeGameElement(val x:Int, val y:Int, var alive:Boolean, world:LifeGameWor
 }
 
 object LifeGameElement {
+  //TODO make implicit
   def toInt(b: Boolean) = if(b) 1 else 0
   def sum(value:CloseSurroundings) = value.surroundings.foldLeft(0)(_ + LifeGameElement.toInt(_))
 

@@ -1,13 +1,11 @@
 package akka
 
-import java.util.ConcurrentModificationException
-
 import akka.actor._
+import akka.event.Logging
 import akka.routing.RoundRobinPool
-import controllers.Application
-import models.World
+
+//TODO rename to bigsoup
 import org.kirhgoff.ap.core._
-import play.api.libs.json._
 
 sealed trait RunnerMessage
 
@@ -80,29 +78,40 @@ class ElementBatchProcessorActor(nrOfWorkers: Int)  extends Actor {
 /**
  * Created with a world to run and runs it
  */
-class PlayWorldRunnerActor(val workers: Int) extends Actor {
+class BigSoupOperatorActor(val workers: Int) extends Actor {
+  val log = Logging(context.system, this)
+
   var iterations:Int = 0
   var currentIteration:Int = -1
   var world:WorldModel = null
   var listener:WorldModelListener = null
 
-  val master = context.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
+  var manager = createManager
+
+  def createManager: ActorRef = {
+    context.actorOf(Props(new ElementBatchProcessorActor(workers)), name = "master")
+  }
 
   def receive = {
     case StartWorldProcessing(world:WorldModel, listener:WorldModelListener, iterations:Int) => {
-      //println ("operator.InitWord")
-      if (alreadyRunning) throw new ConcurrentModificationException("Should not happen")
-      this.world = world
-      this.listener = listener
-      this.iterations = iterations
-      this.currentIteration = 0
+      log.info ("received StartWorldProcessing")
+      if (alreadyRunning) {
+        log.info("already running, ignoring command")
+      } else {
+        manager = createManager
 
-      listener.worldUpdated(world)
+        this.world = world
+        this.listener = listener
+        this.iterations = iterations
+        this.currentIteration = 0
 
-      master ! CalculateNewState(world)
+        listener.worldUpdated(world)
+
+        manager ! CalculateNewState(world)
+      }
     }
     case WorldUpdated(elements) ⇒ {
-      //println (s"operator.WorldUpdated $currentIteration")
+      log.info (s"received WorldUpdated $currentIteration")
       world.setElements(elements)
 
       listener.worldUpdated(world)
@@ -111,15 +120,18 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
       if (currentIteration >= iterations) {
         iterations = 0
         currentIteration = -1
+
         //Stop system
-        context.system.shutdown()
+        log.info("final iteration, stopping manager")
+        context.stop(manager)
       } else {
         sender ! CalculateNewState(world)
       }
     }
     case InterruptWork => {
+      log.info("received InterruptWork, stopping manager")
       //Stop system
-      context.system.shutdown()
+      context.stop(manager)
     }
   }
 
@@ -132,14 +144,19 @@ class PlayWorldRunnerActor(val workers: Int) extends Actor {
 object LifeActors {
   val workers = 100
 
-  def run (world:WorldModel, listener: WorldModelListener, iterations:Int) {
-    val system  = ActorSystem(s"life-model-calculations-world-${world.getClass.getSimpleName}-${world.hashCode}")
-    val operator = system.actorOf(Props(new PlayWorldRunnerActor(workers)), name = "listener")
+  val system  = ActorSystem(s"BigSoupAkka")
+  val operator = system.actorOf(
+    Props(new BigSoupOperatorActor(workers)), //TODO check this
+    name = "listener"
+  )
 
+  def run (world:WorldModel, listener: WorldModelListener, iterations:Int) {
     operator ! StartWorldProcessing(world, listener, iterations)
   }
 
   //TODO create sync method
 
-  def stop = {}
+  def stop = {
+    operator
+  }
 }
