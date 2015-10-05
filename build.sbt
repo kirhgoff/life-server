@@ -1,10 +1,10 @@
-import play.PlayScala
-
 name := """life-server"""
 
 version := "1.0-SNAPSHOT"
 
 lazy val root = project.in(file(".")).enablePlugins(PlayScala)
+
+resolvers += "Local Maven Repository" at "http://eif-repository.moex.com/nexus/content/repositories/releases"
 
 libraryDependencies ++= {
   val akkaV = "2.3.6"
