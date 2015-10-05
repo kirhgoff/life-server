@@ -119,7 +119,7 @@ class LotkeVolterraModelSpec extends Specification {
 
       val listener = new TestListener
       LifeActors.run(world, listener, 3)
-      //TODO remove me
+      //TODO remove me, its even doesnt work
       Thread.sleep(2000)
       val alive = listener.finalWorld.getElements.filter(_.isAlive)
       alive.length shouldEqual 9
