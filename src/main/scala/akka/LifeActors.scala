@@ -98,7 +98,7 @@ class BigSoupOperatorActor(val workers: Int) extends Actor {
       if (alreadyRunning) {
         log.info("already running, ignoring command")
       } else {
-        manager = createManager
+        //manager = createManager
 
         this.world = world
         this.listener = listener
