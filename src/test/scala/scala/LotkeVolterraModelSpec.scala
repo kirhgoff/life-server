@@ -1,11 +1,13 @@
 package scala
 
 import akka.LifeActors
+import org.junit.runner.RunWith
 import org.kirhgoff.ap.core._
 import org.kirhgoff.ap.model.lotke_volterra.{Hunter, Prey, LotkaVolterraWorldGenerator, LotkeVolterraWorldModel}
 import org.specs2.mutable.Specification
+import org.specs2.runner.JUnitRunner
 
-
+@RunWith(classOf[JUnitRunner])
 class LotkeVolterraModelSpec extends Specification {
 
     implicit def convertLotkaVolterra(w:WorldModel):LotkeVolterraWorldModel = w.asInstanceOf[LotkeVolterraWorldModel]

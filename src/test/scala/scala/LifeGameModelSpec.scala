@@ -1,11 +1,14 @@
 package scala
 
+import org.junit.runner.RunWith
 import org.kirhgoff.ap.core._
 import org.kirhgoff.ap.model.lifegame._
 import org.specs2.mutable.Specification
+import org.specs2.runner.JUnitRunner
 
 import scala.util.Random
 
+@RunWith(classOf[JUnitRunner])
 class LifeGameModelSpec extends Specification {
 
   private val printer: LifeGameWorldPrinter = new LifeGameWorldPrinter('1', '0')
