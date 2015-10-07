@@ -46,7 +46,16 @@
       <version>${scala.version}</version>
     </dependency>
 
-
+    <dependency>
+      <groupId>com.typesafe</groupId>
+      <artifactId>scalalogging-slf4j_2.11</artifactId>
+      <version>1.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.0.13</version>
+    </dependency>
 
     <!-- Test -->
     <dependency>

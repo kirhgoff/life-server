@@ -1,0 +1,29 @@
+body {
+    background-color: black;
+    color:white;
+}
+h1 {
+    color: lightblue;
+}
+
+#width {
+  width: 100px;
+}
+
+#height {
+  width: 100px;
+}
+
+#start {
+  width: 200px;
+}
+
+#stop {
+  width: 200px;
+}
+
+#display {
+    width:400px;
+    height:400px;
+}
+
