@@ -5,7 +5,7 @@ import models.StartCommand._
 import models.World
 import org.kirhgoff.ap.core.{WorldModel, WorldModelListener, WorldPrinter}
 import org.kirhgoff.ap.model.lifegame.LifeGameWorldGenerator
-import play.api.Play
+import play.api.{Logger, Play}
 import play.api.libs.EventSource
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.iteratee.{Concurrent, Enumeratee}
@@ -23,7 +23,7 @@ object PlayWorldModelListener extends WorldModelListener {
 //TODO cut org.kirhgoff.ap out and put it to another module
 object Application extends Controller {
 
-  //val logger = Logger(this.getClass)
+  val logger = Logger(this.getClass)
   //Move to Seed
   val MaxSize = 50
   val MaxIterations = 500
@@ -35,9 +35,8 @@ object Application extends Controller {
 
   val (lifeOut, lifeChannel) = Concurrent.broadcast[JsValue]
   
-  def index = Action {
-    print("index aaa")
-    //logger.info(s"Received index request: $request")
+  def index = Action {request =>
+    logger.info(s"Received index request: $request")
     Ok(views.html.react.render("Life Game"))
   }
 
@@ -47,54 +46,49 @@ object Application extends Controller {
     //TODO extract to check method
     command match {
       case StartCommand(width, height, _) if width > MaxSize || height > MaxSize => {
-        //logger.warn(s"Refusing to start, world is too big: [$width, $height]")
+        logger.warn(s"Refusing to start, world is too big: [$width, $height]")
         BadRequest(s"Cannot create world that big size, should be lesser than $MaxSize")
       }
       case StartCommand(_, _, Some(iterations)) if iterations > MaxIterations => {
-        //logger.warn(s"Refusing to start, too many iterations: $iterations")
+        logger.warn(s"Refusing to start, too many iterations: $iterations")
         BadRequest(s"More than $MaxIterations are not allowed")
       }
       case StartCommand(width, height, iterationsOption) => {
         val world: WorldModel = new LifeGameWorldGenerator(LifeRatio)
           .generate(width, height)
-        print ("Starting with world:\n" + world.printer.toAsciiSquare(world))
-        //logger.info("Starting with world:\n" + world.printer.toAsciiSquare(world))
+        logger.info("Starting with world:\n" + world.printer.toAsciiSquare(world))
 
         LifeActors.run(world, PlayWorldModelListener, iterationsOption match {
           case None => DefaultIterations
           case Some(iterations) => iterations
         })
 
-        //logger.info("Big Soup started")
+        logger.info("Big Soup started")
         Ok("Life started")
       }
       case _ => {
-        //logger.warn(s"Incorrect request: $request")
-        print(s"Incorrect request: $request")
+        logger.warn(s"Incorrect request: $request")
         BadRequest("Incorrect data, cannot parse")
       }
     }
   }
 
   def stop = Action { implicit request =>
-    print("stopped")
-    //logger.info("Stopped with " + request)
+    logger.info("Stopped with " + request)
     LifeActors.stop
     Ok("Stopped")
   }
 
   def shutdown = Action { implicit request =>
-    print("sutdown")
-    //logger.info("Stopped with " + request)
+    logger.info("Stopped with " + request)
     LifeActors.stop
-    Play.stop()
+    //Play.stop(Application.this)
     Ok("Shutdown")
   }
 
 
   def lifeFeed() = Action { request =>
-    print(request.remoteAddress + " - client connected")
-    //logger.info(request.remoteAddress + " - client connected")
+    logger.info(request.remoteAddress + " - client connected")
     //WTF!?
     Ok.feed(lifeOut
       &> connDeathWatch(request.remoteAddress)
@@ -103,6 +97,6 @@ object Application extends Controller {
   }
 
   def connDeathWatch(addr: String): Enumeratee[JsValue, JsValue] = 
-    Enumeratee.onIterateeDone{ () => print(addr + " - disconnected")
+    Enumeratee.onIterateeDone{ () => logger.info(addr + " - disconnected")
   }
 }
